@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { IssueService } from '../../services/issue.service';
@@ -33,6 +33,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   successMessage = '';
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private issueService = inject(IssueService);
   authService = inject(AuthService);
   private routeSub: Subscription | null = null;
@@ -64,7 +65,13 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
         next: (users) => {
           this.users = users;
         },
-        error: (err) => console.error('Error fetching users for re-assignment:', err),
+        error: (err) => {
+          console.error('Error fetching users for re-assignment:', err);
+          if (err.status === 401) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          }
+        },
       });
   }
 
@@ -91,7 +98,10 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
         error: (err) => {
           console.error('Error fetching complaint details:', err);
           this.loading = false;
-          if (err.name === 'TimeoutError') {
+          if (err.status === 401) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          } else if (err.name === 'TimeoutError') {
             this.errorMessage = 'Request timed out connecting to backend server at http://127.0.0.1:5000. Please ensure the backend server is running.';
           } else if (err.status === 0) {
             this.errorMessage = 'Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev';
@@ -135,7 +145,12 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.submitting = false;
-          this.errorMessage = err.error?.message || 'Failed to submit response.';
+          if (err.status === 401) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          } else {
+            this.errorMessage = err.error?.message || 'Failed to submit response.';
+          }
         },
       });
   }

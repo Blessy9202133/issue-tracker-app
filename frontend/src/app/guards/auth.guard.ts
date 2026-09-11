@@ -10,6 +10,7 @@ export const authGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  router.navigate(['/login']);
+  // Redirect to login page if session is missing or expired
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
   return false;
 };
