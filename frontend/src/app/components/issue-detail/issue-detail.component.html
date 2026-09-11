@@ -1,78 +1,79 @@
 <div class="page-container">
-  @if (loading) {
+  @if (loading()) {
     <div class="loading-card">
       <p>Loading complaint details...</p>
     </div>
-  } @else if (errorMessage && !issue) {
+  } @else if (errorMessage() && !issue()) {
     <div class="alert alert-error">
-      <strong>⚠️ Connection / Data Error:</strong> {{ errorMessage }}
+      <strong>⚠️ Connection / Data Error:</strong> {{ errorMessage() }}
     </div>
-  } @else if (issue) {
+  } @else if (issue()) {
+    @let i = issue()!;
     <div class="detail-header-card">
       <div class="header-top">
         <div class="code-and-cat">
-          <span class="issue-code">{{ issue.issueCode }}</span>
-          <span class="category-badge" [class.badge-wayside]="issue.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="issue.complaintCategory === 'ONBOARD'">
-            {{ issue.complaintCategory === 'WAYSIDE' ? 'Wayside Complaint' : 'Onboard Complaint' }}
+          <span class="issue-code">{{ i.issueCode }}</span>
+          <span class="category-badge" [class.badge-wayside]="i.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="i.complaintCategory === 'ONBOARD'">
+            {{ i.complaintCategory === 'WAYSIDE' ? 'Wayside Complaint' : 'Onboard Complaint' }}
           </span>
         </div>
-        <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
-          {{ issue.status }}
+        <span class="status-badge" [ngClass]="getStatusClass(i.status)">
+          {{ i.status }}
         </span>
       </div>
 
-      <h1 class="issue-title">Zone: {{ issue.zone }}</h1>
+      <h1 class="issue-title">Zone: {{ i.zone }}</h1>
 
       <!-- Template Specific Metadata Grid -->
       <div class="meta-grid">
         <div class="meta-item">
           <span class="meta-label">Contract:</span>
-          <span class="meta-val">{{ issue.contract || 'N/A' }}</span>
+          <span class="meta-val">{{ i.contract || 'N/A' }}</span>
         </div>
 
-        @if (issue.complaintCategory === 'WAYSIDE') {
+        @if (i.complaintCategory === 'WAYSIDE') {
           <div class="meta-item">
             <span class="meta-label">Station:</span>
-            <span class="meta-val">{{ issue.station || 'N/A' }}</span>
+            <span class="meta-val">{{ i.station || 'N/A' }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Type of Complaint:</span>
-            <span class="meta-val highlight">{{ issue.complaintType || 'N/A' }}</span>
+            <span class="meta-val highlight">{{ i.complaintType || 'N/A' }}</span>
           </div>
         } @else {
           <div class="meta-item">
             <span class="meta-label">Shed Name:</span>
-            <span class="meta-val">{{ issue.shed || 'N/A' }}</span>
+            <span class="meta-val">{{ i.shed || 'N/A' }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Loco Number:</span>
-            <span class="meta-val highlight">{{ issue.locoNumber || 'N/A' }}</span>
+            <span class="meta-val highlight">{{ i.locoNumber || 'N/A' }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Loco / Brake Type:</span>
-            <span class="meta-val">{{ issue.locoType || 'N/A' }} / {{ issue.brakeType || 'N/A' }}</span>
+            <span class="meta-val">{{ i.locoType || 'N/A' }} / {{ i.brakeType || 'N/A' }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Failure Type:</span>
-            <span class="meta-val">{{ issue.failureType || 'N/A' }}</span>
+            <span class="meta-val">{{ i.failureType || 'N/A' }}</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">PO / LOA Number:</span>
-            <span class="meta-val">{{ issue.poLoaNumber || 'N/A' }}</span>
+            <span class="meta-val">{{ i.poLoaNumber || 'N/A' }}</span>
           </div>
         }
 
         <div class="meta-item">
           <span class="meta-label">Raised Date:</span>
-          <span class="meta-val">{{ issue.issueRaisedDate | date: 'mediumDate' }}</span>
+          <span class="meta-val">{{ i.issueRaisedDate | date: 'mediumDate' }}</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Reported By:</span>
-          <span class="meta-val">{{ issue.createdBy?.name || 'N/A' }} ({{ issue.createdBy?.email || 'N/A' }})</span>
+          <span class="meta-val">{{ i.createdBy?.name || 'N/A' }} ({{ i.createdBy?.email || 'N/A' }})</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Currently Assigned To:</span>
-          <span class="meta-val highlight">{{ issue.assignedTo?.name || 'Unassigned' }} ({{ issue.assignedTo?.department || issue.assignedTo?.role || 'Department' }})</span>
+          <span class="meta-val highlight">{{ i.assignedTo?.name || 'Unassigned' }} ({{ i.assignedTo?.department || i.assignedTo?.role || 'Department' }})</span>
         </div>
       </div>
     </div>
@@ -83,15 +84,15 @@
         <!-- Details Card -->
         <div class="card">
           <h3>📋 Complaint Description</h3>
-          <p class="details-text">{{ issue.details }}</p>
+          <p class="details-text">{{ i.details }}</p>
         </div>
 
         <!-- Photos Gallery -->
         <div class="card">
-          <h3>📷 Attached Photos / Files ({{ issue.photos?.length || 0 }})</h3>
-          @if (issue.photos && issue.photos.length > 0) {
+          <h3>📷 Attached Photos / Files ({{ i.photos?.length || 0 }})</h3>
+          @if (i.photos && i.photos.length > 0) {
             <div class="gallery">
-              @for (photo of issue.photos; track photo) {
+              @for (photo of i.photos; track photo) {
                 <a [href]="getImageUrl(photo)" target="_blank" class="gallery-item">
                   <img [src]="getImageUrl(photo)" alt="Complaint photo" />
                 </a>
@@ -105,9 +106,9 @@
         <!-- Comments Audit Log -->
         <div class="card">
           <h3>💬 Response Comments & Timeline</h3>
-          @if (issue.comments && issue.comments.length > 0) {
+          @if (i.comments && i.comments.length > 0) {
             <div class="timeline">
-              @for (c of issue.comments; track c._id) {
+              @for (c of i.comments; track c._id) {
                 <div class="timeline-item">
                   <div class="timeline-header">
                     <strong>{{ c.user?.name || 'User' }}</strong>
@@ -135,11 +136,11 @@
           <h3>✍️ Department Action & Response</h3>
           <p class="sub-text">HBL Admin / Technicians can allocate department, add findings, or update status.</p>
 
-          @if (errorMessage) {
-            <div class="alert alert-error">{{ errorMessage }}</div>
+          @if (errorMessage()) {
+            <div class="alert alert-error">{{ errorMessage() }}</div>
           }
-          @if (successMessage) {
-            <div class="alert alert-success">{{ successMessage }}</div>
+          @if (successMessage()) {
+            <div class="alert alert-success">{{ successMessage() }}</div>
           }
 
           <form (ngSubmit)="onSubmitResponse()">
@@ -147,7 +148,7 @@
             <div class="form-group highlight-box">
               <label for="reassignTo">🏢 Allocate / Re-assign Department</label>
               <select id="reassignTo" name="reassignTo" [(ngModel)]="reassignTo" class="form-control">
-                @for (u of users; track u._id) {
+                @for (u of users(); track u._id) {
                   <option [value]="u._id">
                     {{ u.name }} ({{ u.department || u.role }}) — {{ u.email }}
                   </option>
@@ -189,8 +190,8 @@
               ></textarea>
             </div>
 
-            <button type="submit" [disabled]="submitting" class="btn-submit">
-              {{ submitting ? 'Updating...' : 'Submit Action & Update Assignee' }}
+            <button type="submit" [disabled]="submitting()" class="btn-submit">
+              {{ submitting() ? 'Updating...' : 'Submit Action & Update Assignee' }}
             </button>
           </form>
         </div>

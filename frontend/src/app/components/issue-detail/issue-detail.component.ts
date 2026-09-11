@@ -1,9 +1,8 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { timeout } from 'rxjs/operators';
 import { IssueService } from '../../services/issue.service';
 import { AuthService } from '../../services/auth.service';
 import { Issue } from '../../models/issue.model';
@@ -17,25 +16,25 @@ import { User } from '../../models/user.model';
   styleUrl: './issue-detail.component.css',
 })
 export class IssueDetailComponent implements OnInit, OnDestroy {
-  issue: Issue | null = null;
-  loading = true;
-  errorMessage = '';
+  // Angular Signals for instant template change detection
+  loading = signal<boolean>(true);
+  issue = signal<Issue | null>(null);
+  errorMessage = signal<string>('');
+  successMessage = signal<string>('');
+  submitting = signal<boolean>(false);
+  users = signal<User[]>([]);
 
-  // Users list for department re-assignment
-  users: User[] = [];
-  reassignTo = '';
-
-  // Response Form
+  // Form Fields
   comment = '';
   expectedCompletionDate = '';
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' = 'IN_PROGRESS';
-  submitting = false;
-  successMessage = '';
+  reassignTo = '';
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private issueService = inject(IssueService);
   authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
   private routeSub: Subscription | null = null;
 
   ngOnInit(): void {
@@ -45,8 +44,9 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
       if (id) {
         this.loadIssue(id);
       } else {
-        this.loading = false;
-        this.errorMessage = 'Invalid complaint ID.';
+        this.loading.set(false);
+        this.errorMessage.set('Invalid complaint ID.');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -58,99 +58,106 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   }
 
   loadUsers(): void {
-    this.authService
-      .getUsers()
-      .pipe(timeout(5000))
-      .subscribe({
-        next: (users) => {
-          this.users = users;
-        },
-        error: (err) => {
-          console.error('Error fetching users for re-assignment:', err);
-          if (err.status === 401) {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          }
-        },
-      });
+    this.authService.getUsers().subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error fetching users for re-assignment:', err);
+        if (err.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        }
+      },
+    });
   }
 
   loadIssue(id: string): void {
-    this.loading = true;
-    this.errorMessage = '';
-    this.issueService
-      .getIssueById(id)
-      .pipe(timeout(5000))
-      .subscribe({
-        next: (issue) => {
-          this.issue = issue;
-          if (issue) {
-            this.status = issue.status || 'OPEN';
-            this.reassignTo = issue.assignedTo?._id || '';
-            if (issue.expectedCompletionDate) {
-              this.expectedCompletionDate = new Date(issue.expectedCompletionDate)
-                .toISOString()
-                .substring(0, 10);
-            }
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.cdr.markForCheck();
+
+    this.issueService.getIssueById(id).subscribe({
+      next: (issueData) => {
+        this.issue.set(issueData);
+        if (issueData) {
+          this.status = issueData.status || 'OPEN';
+          this.reassignTo = issueData.assignedTo?._id || '';
+          if (issueData.expectedCompletionDate) {
+            this.expectedCompletionDate = new Date(issueData.expectedCompletionDate)
+              .toISOString()
+              .substring(0, 10);
           }
-          this.loading = false;
-        },
-        error: (err) => {
-          console.error('Error fetching complaint details:', err);
-          this.loading = false;
-          if (err.status === 401) {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          } else if (err.name === 'TimeoutError') {
-            this.errorMessage = 'Request timed out connecting to backend server at http://127.0.0.1:5000. Please ensure the backend server is running.';
-          } else if (err.status === 0) {
-            this.errorMessage = 'Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev';
-          } else {
-            this.errorMessage = err.error?.message || 'Failed to load complaint details from server.';
-          }
-        },
-      });
+        }
+        this.loading.set(false);
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching complaint details:', err);
+        this.loading.set(false);
+        if (err.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
+        } else if (err.status === 0) {
+          this.errorMessage.set('Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev');
+        } else {
+          this.errorMessage.set(err.error?.message || 'Failed to load complaint details from server.');
+        }
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   onSubmitResponse(): void {
-    if (!this.issue) return;
-    
-    const isReassigned = this.reassignTo && this.reassignTo !== this.issue.assignedTo?._id;
+    const currentIssue = this.issue();
+    if (!currentIssue) return;
 
-    if (!this.comment && !this.expectedCompletionDate && !isReassigned && this.status === this.issue.status) {
-      this.errorMessage = 'Please provide a comment, update completion date, change status, or re-assign to a department.';
+    const isReassigned = this.reassignTo && this.reassignTo !== currentIssue.assignedTo?._id;
+
+    if (!this.comment && !this.expectedCompletionDate && !isReassigned && this.status === currentIssue.status) {
+      this.errorMessage.set('Please provide a comment, update completion date, change status, or re-assign to a department.');
+      this.cdr.markForCheck();
       return;
     }
 
-    this.submitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    this.submitting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.cdr.markForCheck();
 
     this.issueService
-      .respondToIssue(this.issue._id, {
+      .respondToIssue(currentIssue._id, {
         comment: this.comment,
         expectedCompletionDate: this.expectedCompletionDate,
         status: this.status,
         reassignTo: this.reassignTo,
       })
-      .pipe(timeout(5000))
       .subscribe({
         next: (updatedIssue) => {
-          this.issue = updatedIssue;
+          this.issue.set(updatedIssue);
           this.comment = '';
-          this.submitting = false;
-          this.successMessage = isReassigned
-            ? `Complaint re-assigned & notification logged for ${updatedIssue.assignedTo?.name} (${updatedIssue.assignedTo?.department || 'Department'})!`
-            : 'Response submitted successfully!';
+          this.submitting.set(false);
+          this.successMessage.set(
+            isReassigned
+              ? `Complaint re-assigned to ${updatedIssue.assignedTo?.name} (${updatedIssue.assignedTo?.department || 'Department'})!`
+              : 'Response submitted successfully!'
+          );
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          this.submitting = false;
+          this.submitting.set(false);
           if (err.status === 401) {
             this.authService.logout();
             this.router.navigate(['/login']);
           } else {
-            this.errorMessage = err.error?.message || 'Failed to submit response.';
+            this.errorMessage.set(err.error?.message || 'Failed to submit response.');
           }
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
       });
   }
