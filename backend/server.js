@@ -67,8 +67,8 @@ const seedUsers = async () => {
         },
       ]);
       console.log('HBL Portal users seeded:');
-      console.log(' - Sushma (Customer)');
-      console.log(' - jahnavi (hbl_emp)');
+      console.log(' - Sushma (hbl_emp)');
+      console.log(' - jahnavi (Customer)');
       console.log(' - prabhakar (admin)');
     }
   } catch (err) {
