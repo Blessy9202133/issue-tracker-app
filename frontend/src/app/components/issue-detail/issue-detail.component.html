@@ -1,8 +1,12 @@
 <div class="page-container">
   @if (loading) {
-    <div class="loading-card">Loading complaint details...</div>
+    <div class="loading-card">
+      <p>Loading complaint details...</p>
+    </div>
   } @else if (errorMessage && !issue) {
-    <div class="alert alert-error">{{ errorMessage }}</div>
+    <div class="alert alert-error">
+      <strong>⚠️ Connection / Data Error:</strong> {{ errorMessage }}
+    </div>
   } @else if (issue) {
     <div class="detail-header-card">
       <div class="header-top">
@@ -64,11 +68,11 @@
         </div>
         <div class="meta-item">
           <span class="meta-label">Reported By:</span>
-          <span class="meta-val">{{ issue.createdBy?.name }} ({{ issue.createdBy?.email }})</span>
+          <span class="meta-val">{{ issue.createdBy?.name || 'N/A' }} ({{ issue.createdBy?.email || 'N/A' }})</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Assigned To:</span>
-          <span class="meta-val">{{ issue.assignedTo?.name }} ({{ issue.assignedTo?.email }})</span>
+          <span class="meta-val">{{ issue.assignedTo?.name || 'Unassigned' }} ({{ issue.assignedTo?.email || 'N/A' }})</span>
         </div>
       </div>
     </div>
@@ -84,7 +88,7 @@
 
         <!-- Photos Gallery -->
         <div class="card">
-          <h3>📷 Attached Photos / Files ({{ issue.photos.length }})</h3>
+          <h3>📷 Attached Photos / Files ({{ issue.photos?.length || 0 }})</h3>
           @if (issue.photos && issue.photos.length > 0) {
             <div class="gallery">
               @for (photo of issue.photos; track photo) {
@@ -106,8 +110,8 @@
               @for (c of issue.comments; track c._id) {
                 <div class="timeline-item">
                   <div class="timeline-header">
-                    <strong>{{ c.user?.name }}</strong>
-                    <span class="role-badge">{{ c.user?.role }}</span>
+                    <strong>{{ c.user?.name || 'User' }}</strong>
+                    <span class="role-badge">{{ c.user?.role || 'User' }}</span>
                     <span class="time">{{ c.createdAt | date: 'short' }}</span>
                   </div>
                   <p class="comment-body">{{ c.comment }}</p>

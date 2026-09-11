@@ -33,25 +33,36 @@ export class IssueDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadIssue(id);
+    } else {
+      this.loading = false;
+      this.errorMessage = 'Invalid complaint ID.';
     }
   }
 
   loadIssue(id: string): void {
     this.loading = true;
+    this.errorMessage = '';
     this.issueService.getIssueById(id).subscribe({
       next: (issue) => {
         this.issue = issue;
-        this.status = issue.status;
-        if (issue.expectedCompletionDate) {
-          this.expectedCompletionDate = new Date(issue.expectedCompletionDate)
-            .toISOString()
-            .substring(0, 10);
+        if (issue) {
+          this.status = issue.status || 'OPEN';
+          if (issue.expectedCompletionDate) {
+            this.expectedCompletionDate = new Date(issue.expectedCompletionDate)
+              .toISOString()
+              .substring(0, 10);
+          }
         }
         this.loading = false;
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Failed to load issue details.';
+        console.error('Error fetching complaint details:', err);
         this.loading = false;
+        if (err.status === 0) {
+          this.errorMessage = 'Backend API server on http://localhost:5000 is not running. Please start the backend using: cd backend && npm run dev';
+        } else {
+          this.errorMessage = err.error?.message || 'Failed to load complaint details from server.';
+        }
       },
     });
   }
@@ -88,6 +99,7 @@ export class IssueDetailComponent implements OnInit {
   }
 
   getImageUrl(path: string): string {
+    if (!path) return '';
     if (path.startsWith('http')) return path;
     return `http://localhost:5000${path}`;
   }
