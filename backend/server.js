@@ -14,7 +14,7 @@ connectDB();
 
 const app = express();
 
-// Middlewares
+// Middlewares - Allow CORS from localhost & 127.0.0.1
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -67,8 +67,8 @@ const seedUsers = async () => {
         },
       ]);
       console.log('HBL Portal users seeded:');
-      console.log(' - Sushma (hbl_emp)');
-      console.log(' - jahnavi (Customer)');
+      console.log(' - Sushma (Customer)');
+      console.log(' - jahnavi (hbl_emp)');
       console.log(' - prabhakar (admin)');
     }
   } catch (err) {
@@ -80,6 +80,7 @@ seedUsers();
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Customer Complaint Portal API running on port ${PORT}`);
+// Explicitly listen on 0.0.0.0 to support both IPv4 and IPv6 instant connections
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Customer Complaint Portal API running on http://127.0.0.1:${PORT}`);
 });

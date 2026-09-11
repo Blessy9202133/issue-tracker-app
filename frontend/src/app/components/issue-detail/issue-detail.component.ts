@@ -73,7 +73,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     this.issueService
       .getIssueById(id)
-      .pipe(timeout(5000)) // 5 second max HTTP timeout
+      .pipe(timeout(5000))
       .subscribe({
         next: (issue) => {
           this.issue = issue;
@@ -92,9 +92,9 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
           console.error('Error fetching complaint details:', err);
           this.loading = false;
           if (err.name === 'TimeoutError') {
-            this.errorMessage = 'Request timed out connecting to backend server at http://localhost:5000. Please ensure the backend server is running.';
+            this.errorMessage = 'Request timed out connecting to backend server at http://127.0.0.1:5000. Please ensure the backend server is running.';
           } else if (err.status === 0) {
-            this.errorMessage = 'Backend API server on http://localhost:5000 is not running. Please start the backend using: cd backend && npm run dev';
+            this.errorMessage = 'Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev';
           } else {
             this.errorMessage = err.error?.message || 'Failed to load complaint details from server.';
           }
@@ -143,7 +143,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   getImageUrl(path: string): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    return `http://localhost:5000${path}`;
+    return `http://127.0.0.1:5000${path}`;
   }
 
   getStatusClass(status: string): string {
