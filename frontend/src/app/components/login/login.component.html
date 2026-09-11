@@ -1,0 +1,62 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Welcome Back</h2>
+      <p>Log in to access your Issue Tracker Dashboard</p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="e.g. manager@issuetracker.com"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <button type="submit" [disabled]="loading" class="btn-submit">
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <div class="demo-accounts">
+      <p class="demo-title">Quick Demo Login:</p>
+      <div class="demo-buttons">
+        <button (click)="fillDemo('manager@issuetracker.com')" class="btn-demo">
+          Reporter (Manager)
+        </button>
+        <button (click)="fillDemo('john.tech@issuetracker.com')" class="btn-demo">
+          Assignee (John Tech)
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a routerLink="/register">Register here</a></p>
+    </div>
+  </div>
+</div>

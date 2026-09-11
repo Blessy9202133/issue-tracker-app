@@ -1,0 +1,146 @@
+<div class="page-container">
+  @if (loading) {
+    <div class="loading-card">Loading issue details...</div>
+  } @else if (errorMessage && !issue) {
+    <div class="alert alert-error">{{ errorMessage }}</div>
+  } @else if (issue) {
+    <div class="detail-header-card">
+      <div class="header-top">
+        <span class="issue-code">{{ issue.issueCode }}</span>
+        <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
+          {{ issue.status }}
+        </span>
+      </div>
+
+      <h1 class="issue-title">Zone: {{ issue.zone }} — Shed: {{ issue.shed }}</h1>
+
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-label">Raised Date:</span>
+          <span class="meta-val">{{ issue.issueRaisedDate | date: 'mediumDate' }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Target Completion:</span>
+          <span class="meta-val highlight">
+            {{ issue.expectedCompletionDate ? (issue.expectedCompletionDate | date: 'mediumDate') : 'Not Set' }}
+          </span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Reported By:</span>
+          <span class="meta-val">{{ issue.createdBy.name }} ({{ issue.createdBy.email }})</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Assigned To:</span>
+          <span class="meta-val">{{ issue.assignedTo.name }} ({{ issue.assignedTo.email }})</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <!-- Left Column: Details & Photos -->
+      <div class="left-col">
+        <!-- Details Card -->
+        <div class="card">
+          <h3>📋 Problem Description</h3>
+          <p class="details-text">{{ issue.details }}</p>
+        </div>
+
+        <!-- Photos Gallery -->
+        <div class="card">
+          <h3>📷 Attached Photos ({{ issue.photos.length }})</h3>
+          @if (issue.photos && issue.photos.length > 0) {
+            <div class="gallery">
+              @for (photo of issue.photos; track photo) {
+                <a [href]="getImageUrl(photo)" target="_blank" class="gallery-item">
+                  <img [src]="getImageUrl(photo)" alt="Issue photo" />
+                </a>
+              }
+            </div>
+          } @else {
+            <p class="no-data">No photos attached to this issue.</p>
+          }
+        </div>
+
+        <!-- Comments Audit Log -->
+        <div class="card">
+          <h3>💬 Response Comments & Timeline</h3>
+          @if (issue.comments && issue.comments.length > 0) {
+            <div class="timeline">
+              @for (c of issue.comments; track c._id) {
+                <div class="timeline-item">
+                  <div class="timeline-header">
+                    <strong>{{ c.user.name }}</strong>
+                    <span class="role-badge">{{ c.user.role }}</span>
+                    <span class="time">{{ c.createdAt | date: 'short' }}</span>
+                  </div>
+                  <p class="comment-body">{{ c.comment }}</p>
+                  @if (c.targetDate) {
+                    <div class="target-badge">
+                      📅 Updated Expected Date: {{ c.targetDate | date: 'mediumDate' }}
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <p class="no-data">No comments or responses added yet.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Right Column: Response Action Form -->
+      <div class="right-col">
+        <div class="card response-card">
+          <h3>✍️ Submit Response</h3>
+          <p class="sub-text">Add your findings, update completion date, or change issue status.</p>
+
+          @if (errorMessage) {
+            <div class="alert alert-error">{{ errorMessage }}</div>
+          }
+          @if (successMessage) {
+            <div class="alert alert-success">{{ successMessage }}</div>
+          }
+
+          <form (ngSubmit)="onSubmitResponse()">
+            <div class="form-group">
+              <label for="status">Update Status</label>
+              <select id="status" name="status" [(ngModel)]="status" class="form-control">
+                <option value="OPEN">Open</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="targetDate">Expected Completion Date</label>
+              <input
+                type="date"
+                id="targetDate"
+                name="targetDate"
+                [(ngModel)]="expectedCompletionDate"
+                class="form-control"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="comment">Response Comment</label>
+              <textarea
+                id="comment"
+                name="comment"
+                rows="4"
+                [(ngModel)]="comment"
+                placeholder="Write your inspection findings, action taken, or parts ordered..."
+                class="form-control"
+              ></textarea>
+            </div>
+
+            <button type="submit" [disabled]="submitting" class="btn-submit">
+              {{ submitting ? 'Updating Issue...' : 'Submit Response & Update' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+</div>

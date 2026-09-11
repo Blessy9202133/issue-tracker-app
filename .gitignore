@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Angular build outputs
+frontend/dist/
+frontend/.angular/
+
+# Uploaded files
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Operating system files
+.DS_Store
+Thumbs.db

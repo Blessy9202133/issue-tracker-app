@@ -1,0 +1,73 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2>Create Account</h2>
+      <p>Register as a Reporter or Assignee to manage issues</p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-error">
+        {{ errorMessage }}
+      </div>
+    }
+
+    <form (ngSubmit)="onSubmit()" #regForm="ngForm">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          [(ngModel)]="name"
+          placeholder="John Doe"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="name@company.com"
+          required
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password (min 6 characters)</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          required
+          minlength="6"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="role">User Role</label>
+        <select id="role" name="role" [(ngModel)]="role" class="form-control">
+          <option value="REPORTER">Reporter (Log & raise issues)</option>
+          <option value="ASSIGNEE">Assignee (Respond & resolve issues)</option>
+          <option value="ADMIN">Admin</option>
+        </select>
+      </div>
+
+      <button type="submit" [disabled]="loading" class="btn-submit">
+        {{ loading ? 'Creating Account...' : 'Register' }}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a routerLink="/login">Log in here</a></p>
+    </div>
+  </div>
+</div>
