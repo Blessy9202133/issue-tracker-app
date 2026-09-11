@@ -33,8 +33,8 @@ export class CreateIssueComponent implements OnInit {
   // Onboard Fields
   shed = '';
   locoNumber = '';
-  locoType = '';
-  brakeType = '';
+  locoType = 'WAP-7';
+  brakeType = 'E-70';
   failureType = '';
   poLoaNumber = '';
 
@@ -74,6 +74,40 @@ export class CreateIssueComponent implements OnInit {
     'Power Supply Issue',
     'Software Bug',
     'Others',
+  ];
+
+  locoTypes = [
+    'WAP-7',
+    'WAP-5',
+    'WAP-9',
+    'WAP-4',
+    'WAG-7',
+    'WAG-9',
+    'WAG-9I',
+    'WAG-9H',
+    'WAG-9HC',
+    'WAG-10HC',
+    'WDG',
+    'WDG-2',
+    'WDG-3',
+    'WDG-3A',
+    'EMU',
+    'MEMU',
+    'Vande Bharat',
+    'Amrit Bharat',
+    'WDM',
+    'WDM-3',
+    'WDS-6',
+    'EF-9K',
+  ];
+
+  brakeTypes = [
+    'E-70',
+    'CCB',
+    'IRAB',
+    'Conventional',
+    'RCCB',
+    'ESCORT',
   ];
 
   private issueService = inject(IssueService);

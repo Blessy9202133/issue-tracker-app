@@ -149,30 +149,26 @@
             />
           </div>
 
-          <!-- Loco Type -->
+          <!-- Loco Type Dropdown -->
           <div class="form-group">
             <label for="locoType">Loco Type</label>
-            <input
-              type="text"
-              id="locoType"
-              name="locoType"
-              [(ngModel)]="locoType"
-              placeholder="Loco Type"
-              class="form-control"
-            />
+            <select id="locoType" name="locoType" [(ngModel)]="locoType" class="form-control">
+              <option value="" disabled>Select Loco Type</option>
+              @for (lt of locoTypes; track lt) {
+                <option [value]="lt">{{ lt }}</option>
+              }
+            </select>
           </div>
 
-          <!-- Brake Type -->
+          <!-- Brake Type Dropdown -->
           <div class="form-group">
             <label for="brakeType">Brake Type</label>
-            <input
-              type="text"
-              id="brakeType"
-              name="brakeType"
-              [(ngModel)]="brakeType"
-              placeholder="Brake Type"
-              class="form-control"
-            />
+            <select id="brakeType" name="brakeType" [(ngModel)]="brakeType" class="form-control">
+              <option value="" disabled>Select Brake Type</option>
+              @for (bt of brakeTypes; track bt) {
+                <option [value]="bt">{{ bt }}</option>
+              }
+            </select>
           </div>
 
           <!-- Failure Type -->
