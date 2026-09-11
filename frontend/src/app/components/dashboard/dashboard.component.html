@@ -2,7 +2,7 @@
   <div class="dashboard-header">
     <div>
       <h2>Customer Complaint Dashboard</h2>
-      <p>Overview of logged customer complaints across zones and sheds</p>
+      <p>Overview of logged Wayside and Onboard customer complaints</p>
     </div>
     <a routerLink="/create-issue" class="btn-create">+ Log New Complaint</a>
   </div>
@@ -30,6 +30,15 @@
   <!-- Filter Controls -->
   <div class="filters-card">
     <div class="filter-group">
+      <label>Category Template</label>
+      <select [(ngModel)]="complaintCategoryFilter" (change)="onFilterChange()" class="filter-control">
+        <option value="">All Categories</option>
+        <option value="WAYSIDE">Wayside Complaints</option>
+        <option value="ONBOARD">Onboard Complaints</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
       <label>Status</label>
       <select [(ngModel)]="statusFilter" (change)="onFilterChange()" class="filter-control">
         <option value="">All Statuses</option>
@@ -51,17 +60,6 @@
       />
     </div>
 
-    <div class="filter-group">
-      <label>Shed Search</label>
-      <input
-        type="text"
-        [(ngModel)]="shedFilter"
-        (input)="onFilterChange()"
-        placeholder="Filter by shed..."
-        class="filter-control"
-      />
-    </div>
-
     <div class="filter-group filter-checkbox">
       <label>
         <input type="checkbox" [(ngModel)]="assignedToMeFilter" (change)="onFilterChange()" />
@@ -70,7 +68,7 @@
     </div>
   </div>
 
-  <!-- Issue List Table -->
+  <!-- Complaint List Table -->
   <div class="table-card">
     @if (loading) {
       <div class="loading-state">Loading complaints database...</div>
@@ -85,7 +83,8 @@
         <thead>
           <tr>
             <th>Code</th>
-            <th>Zone / Shed</th>
+            <th>Category</th>
+            <th>Zone / Location</th>
             <th>Complaint Details</th>
             <th>Raised Date</th>
             <th>Photos</th>
@@ -99,8 +98,23 @@
             <tr>
               <td class="font-bold">{{ issue.issueCode }}</td>
               <td>
+                <span class="category-badge" [class.badge-wayside]="issue.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="issue.complaintCategory === 'ONBOARD'">
+                  {{ issue.complaintCategory === 'WAYSIDE' ? '🛤️ Wayside' : '🚆 Onboard' }}
+                </span>
+              </td>
+              <td>
                 <div class="zone-tag">{{ issue.zone }}</div>
-                <div class="shed-sub">{{ issue.shed }}</div>
+                @if (issue.complaintCategory === 'WAYSIDE') {
+                  <div class="sub-location">Stn: {{ issue.station || 'N/A' }}</div>
+                  @if (issue.complaintType) {
+                    <div class="type-sub">({{ issue.complaintType }})</div>
+                  }
+                } @else {
+                  <div class="sub-location">Shed: {{ issue.shed || 'N/A' }}</div>
+                  @if (issue.locoNumber) {
+                    <div class="type-sub">Loco: {{ issue.locoNumber }}</div>
+                  }
+                }
               </td>
               <td class="details-cell" [title]="issue.details">
                 {{ issue.details }}

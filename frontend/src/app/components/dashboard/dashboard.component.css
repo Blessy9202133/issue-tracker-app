@@ -1,5 +1,5 @@
 .dashboard-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 2rem auto;
   padding: 0 1.5rem;
 }
@@ -99,6 +99,25 @@
   cursor: pointer;
 }
 
+/* Category Badges */
+.category-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-wayside {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+.badge-onboard {
+  background-color: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
 /* Table */
 .table-card {
   background: white;
@@ -129,7 +148,8 @@
 }
 .font-bold { font-weight: 700; color: #0f172a; }
 .zone-tag { font-weight: 600; color: #1e293b; }
-.shed-sub { font-size: 0.8rem; color: #64748b; }
+.sub-location { font-size: 0.825rem; color: #475569; font-weight: 500; }
+.type-sub { font-size: 0.75rem; color: #64748b; }
 .details-cell {
   max-width: 250px;
   white-space: nowrap;

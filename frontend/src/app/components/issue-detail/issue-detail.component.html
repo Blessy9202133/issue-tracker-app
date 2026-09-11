@@ -1,37 +1,74 @@
 <div class="page-container">
   @if (loading) {
-    <div class="loading-card">Loading issue details...</div>
+    <div class="loading-card">Loading complaint details...</div>
   } @else if (errorMessage && !issue) {
     <div class="alert alert-error">{{ errorMessage }}</div>
   } @else if (issue) {
     <div class="detail-header-card">
       <div class="header-top">
-        <span class="issue-code">{{ issue.issueCode }}</span>
+        <div class="code-and-cat">
+          <span class="issue-code">{{ issue.issueCode }}</span>
+          <span class="category-badge" [class.badge-wayside]="issue.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="issue.complaintCategory === 'ONBOARD'">
+            {{ issue.complaintCategory === 'WAYSIDE' ? '🛤️ Wayside Complaint' : '🚆 Onboard Complaint' }}
+          </span>
+        </div>
         <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
           {{ issue.status }}
         </span>
       </div>
 
-      <h1 class="issue-title">Zone: {{ issue.zone }} — Shed: {{ issue.shed }}</h1>
+      <h1 class="issue-title">Zone: {{ issue.zone }}</h1>
 
+      <!-- Template Specific Metadata Grid -->
       <div class="meta-grid">
+        <div class="meta-item">
+          <span class="meta-label">Contract:</span>
+          <span class="meta-val">{{ issue.contract || 'N/A' }}</span>
+        </div>
+
+        @if (issue.complaintCategory === 'WAYSIDE') {
+          <div class="meta-item">
+            <span class="meta-label">Station:</span>
+            <span class="meta-val">{{ issue.station || 'N/A' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Type of Complaint:</span>
+            <span class="meta-val highlight">{{ issue.complaintType || 'N/A' }}</span>
+          </div>
+        } @else {
+          <div class="meta-item">
+            <span class="meta-label">Shed Name:</span>
+            <span class="meta-val">{{ issue.shed || 'N/A' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Loco Number:</span>
+            <span class="meta-val highlight">{{ issue.locoNumber || 'N/A' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Loco / Brake Type:</span>
+            <span class="meta-val">{{ issue.locoType || 'N/A' }} / {{ issue.brakeType || 'N/A' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Failure Type:</span>
+            <span class="meta-val">{{ issue.failureType || 'N/A' }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">PO / LOA Number:</span>
+            <span class="meta-val">{{ issue.poLoaNumber || 'N/A' }}</span>
+          </div>
+        }
+
         <div class="meta-item">
           <span class="meta-label">Raised Date:</span>
           <span class="meta-val">{{ issue.issueRaisedDate | date: 'mediumDate' }}</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Target Completion:</span>
-          <span class="meta-val highlight">
-            {{ issue.expectedCompletionDate ? (issue.expectedCompletionDate | date: 'mediumDate') : 'Not Set' }}
-          </span>
-        </div>
-        <div class="meta-item">
           <span class="meta-label">Reported By:</span>
-          <span class="meta-val">{{ issue.createdBy.name }} ({{ issue.createdBy.email }})</span>
+          <span class="meta-val">{{ issue.createdBy?.name }} ({{ issue.createdBy?.email }})</span>
         </div>
         <div class="meta-item">
           <span class="meta-label">Assigned To:</span>
-          <span class="meta-val">{{ issue.assignedTo.name }} ({{ issue.assignedTo.email }})</span>
+          <span class="meta-val">{{ issue.assignedTo?.name }} ({{ issue.assignedTo?.email }})</span>
         </div>
       </div>
     </div>
@@ -41,23 +78,23 @@
       <div class="left-col">
         <!-- Details Card -->
         <div class="card">
-          <h3>📋 Problem Description</h3>
+          <h3>📋 Complaint Description</h3>
           <p class="details-text">{{ issue.details }}</p>
         </div>
 
         <!-- Photos Gallery -->
         <div class="card">
-          <h3>📷 Attached Photos ({{ issue.photos.length }})</h3>
+          <h3>📷 Attached Photos / Files ({{ issue.photos.length }})</h3>
           @if (issue.photos && issue.photos.length > 0) {
             <div class="gallery">
               @for (photo of issue.photos; track photo) {
                 <a [href]="getImageUrl(photo)" target="_blank" class="gallery-item">
-                  <img [src]="getImageUrl(photo)" alt="Issue photo" />
+                  <img [src]="getImageUrl(photo)" alt="Complaint photo" />
                 </a>
               }
             </div>
           } @else {
-            <p class="no-data">No photos attached to this issue.</p>
+            <p class="no-data">No photos or files attached to this complaint.</p>
           }
         </div>
 
@@ -69,21 +106,21 @@
               @for (c of issue.comments; track c._id) {
                 <div class="timeline-item">
                   <div class="timeline-header">
-                    <strong>{{ c.user.name }}</strong>
-                    <span class="role-badge">{{ c.user.role }}</span>
+                    <strong>{{ c.user?.name }}</strong>
+                    <span class="role-badge">{{ c.user?.role }}</span>
                     <span class="time">{{ c.createdAt | date: 'short' }}</span>
                   </div>
                   <p class="comment-body">{{ c.comment }}</p>
                   @if (c.targetDate) {
                     <div class="target-badge">
-                      📅 Updated Expected Date: {{ c.targetDate | date: 'mediumDate' }}
+                      📅 Updated Target Date: {{ c.targetDate | date: 'mediumDate' }}
                     </div>
                   }
                 </div>
               }
             </div>
           } @else {
-            <p class="no-data">No comments or responses added yet.</p>
+            <p class="no-data">No response comments added yet.</p>
           }
         </div>
       </div>
@@ -92,7 +129,7 @@
       <div class="right-col">
         <div class="card response-card">
           <h3>✍️ Submit Response</h3>
-          <p class="sub-text">Add your findings, update completion date, or change issue status.</p>
+          <p class="sub-text">Add your findings, update completion date, or change status.</p>
 
           @if (errorMessage) {
             <div class="alert alert-error">{{ errorMessage }}</div>
@@ -130,13 +167,13 @@
                 name="comment"
                 rows="4"
                 [(ngModel)]="comment"
-                placeholder="Write your inspection findings, action taken, or parts ordered..."
+                placeholder="Write your inspection findings, action taken, or parts status..."
                 class="form-control"
               ></textarea>
             </div>
 
             <button type="submit" [disabled]="submitting" class="btn-submit">
-              {{ submitting ? 'Updating Issue...' : 'Submit Response & Update' }}
+              {{ submitting ? 'Updating Complaint...' : 'Submit Response & Update' }}
             </button>
           </form>
         </div>

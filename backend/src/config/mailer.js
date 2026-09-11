@@ -21,18 +21,59 @@ const sendIssueAssignmentEmail = async (issue, assigneeUser) => {
     const clientUrl = process.env.CLIENT_URL || 'http://localhost:4200';
     const issueLink = `${clientUrl}/issues/${issue._id}`;
 
+    let templateSpecificRows = '';
+    if (issue.complaintCategory === 'WAYSIDE') {
+      templateSpecificRows = `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Contract:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.contract || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Station:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.station || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Complaint Type:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.complaintType || 'N/A'}</td>
+        </tr>
+      `;
+    } else {
+      templateSpecificRows = `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Contract:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.contract || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Shed Name:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.shed || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Loco Number:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.locoNumber || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Loco Type / Brake Type:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.locoType || 'N/A'} / ${issue.brakeType || 'N/A'}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Failure Type / PO-LOA No:</td>
+          <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.failureType || 'N/A'} (PO/LOA: ${issue.poLoaNumber || 'N/A'})</td>
+        </tr>
+      `;
+    }
+
     const mailOptions = {
       from: process.env.SMTP_FROM || '"Customer Complaint Portal" <no-reply@complaintportal.com>',
       to: assigneeUser.email,
-      subject: `[Complaint Assigned] ${issue.issueCode} - Zone: ${issue.zone}, Shed: ${issue.shed}`,
+      subject: `[${issue.complaintCategory} Complaint Assigned] ${issue.issueCode} - Zone: ${issue.zone}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
           <div style="background-color: #0056b3; color: white; padding: 20px; text-align: center;">
-            <h2>Customer Complaint Assigned to You</h2>
+            <h2>New ${issue.complaintCategory} Complaint Assigned</h2>
           </div>
           <div style="padding: 20px;">
             <p>Hello <strong>${assigneeUser.name}</strong>,</p>
-            <p>A new customer complaint has been assigned to you. Here are the details:</p>
+            <p>You have been assigned a new <strong>${issue.complaintCategory}</strong> customer complaint. Details:</p>
             
             <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
               <tr>
@@ -40,19 +81,20 @@ const sendIssueAssignmentEmail = async (issue, assigneeUser) => {
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.issueCode}</td>
               </tr>
               <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Category:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.complaintCategory}</td>
+              </tr>
+              <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Zone:</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.zone}</td>
               </tr>
-              <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Shed:</td>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.shed}</td>
-              </tr>
+              ${templateSpecificRows}
               <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Raised Date:</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${new Date(issue.issueRaisedDate).toLocaleDateString()}</td>
               </tr>
               <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Details:</td>
+                <td style="padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold;">Description:</td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">${issue.details}</td>
               </tr>
             </table>

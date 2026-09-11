@@ -14,13 +14,29 @@ import { User } from '../../models/user.model';
   styleUrl: './create-issue.component.css',
 })
 export class CreateIssueComponent implements OnInit {
-  zone = 'Zone A';
-  shed = '';
+  // Template Selector: 'WAYSIDE' or 'ONBOARD'
+  complaintCategory: 'WAYSIDE' | 'ONBOARD' = 'WAYSIDE';
+
+  // Common Fields
+  zone = 'North Zone';
+  contract = '';
   details = '';
   issueRaisedDate = new Date().toISOString().substring(0, 10);
   assignedTo = '';
   selectedFiles: File[] = [];
   previewUrls: string[] = [];
+
+  // Wayside Fields
+  station = '';
+  complaintType = 'Application Related';
+
+  // Onboard Fields
+  shed = '';
+  locoNumber = '';
+  locoType = '';
+  brakeType = '';
+  failureType = '';
+  poLoaNumber = '';
 
   users: User[] = [];
   loadingUsers = true;
@@ -28,7 +44,17 @@ export class CreateIssueComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  zones = ['Zone A', 'Zone B', 'Zone C', 'Zone D', 'Central Zone', 'North Yard'];
+  zones = ['North Zone', 'South Zone', 'East Zone', 'West Zone', 'Central Zone', 'SCR', 'SR', 'WR', 'NR'];
+
+  complaintTypes = [
+    'NMS',
+    'Application Related',
+    'Hardware Defect',
+    'Network/Communication',
+    'Power Supply Issue',
+    'Software Bug',
+    'Others',
+  ];
 
   private issueService = inject(IssueService);
   private authService = inject(AuthService);
@@ -44,7 +70,6 @@ export class CreateIssueComponent implements OnInit {
         this.users = users;
         this.loadingUsers = false;
         if (users.length > 0) {
-          // Select first assignee or non-reporter user by default
           const defaultAssignee = users.find((u) => u.role === 'ASSIGNEE') || users[0];
           this.assignedTo = defaultAssignee._id;
         }
@@ -54,6 +79,10 @@ export class CreateIssueComponent implements OnInit {
         this.loadingUsers = false;
       },
     });
+  }
+
+  setCategory(category: 'WAYSIDE' | 'ONBOARD'): void {
+    this.complaintCategory = category;
   }
 
   onFileChange(event: any): void {
@@ -73,8 +102,18 @@ export class CreateIssueComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.zone || !this.shed || !this.details || !this.assignedTo) {
-      this.errorMessage = 'Please complete all required fields (Zone, Shed, Details, and Assignee).';
+    if (!this.zone || !this.details || !this.assignedTo) {
+      this.errorMessage = 'Please complete all required fields (Zone, Description, and Assignee).';
+      return;
+    }
+
+    if (this.complaintCategory === 'WAYSIDE' && !this.station) {
+      this.errorMessage = 'Station is required for Wayside complaints.';
+      return;
+    }
+
+    if (this.complaintCategory === 'ONBOARD' && (!this.shed || !this.locoNumber)) {
+      this.errorMessage = 'Shed Name and Loco Number are required for Onboard complaints.';
       return;
     }
 
@@ -83,11 +122,24 @@ export class CreateIssueComponent implements OnInit {
     this.successMessage = '';
 
     const formData = new FormData();
+    formData.append('complaintCategory', this.complaintCategory);
     formData.append('zone', this.zone);
-    formData.append('shed', this.shed);
+    formData.append('contract', this.contract);
     formData.append('details', this.details);
     formData.append('issueRaisedDate', this.issueRaisedDate);
     formData.append('assignedTo', this.assignedTo);
+
+    if (this.complaintCategory === 'WAYSIDE') {
+      formData.append('station', this.station);
+      formData.append('complaintType', this.complaintType);
+    } else {
+      formData.append('shed', this.shed);
+      formData.append('locoNumber', this.locoNumber);
+      formData.append('locoType', this.locoType);
+      formData.append('brakeType', this.brakeType);
+      formData.append('failureType', this.failureType);
+      formData.append('poLoaNumber', this.poLoaNumber);
+    }
 
     this.selectedFiles.forEach((file) => {
       formData.append('photos', file);
@@ -96,14 +148,14 @@ export class CreateIssueComponent implements OnInit {
     this.issueService.createIssue(formData).subscribe({
       next: (createdIssue) => {
         this.submitting = false;
-        this.successMessage = `Issue ${createdIssue.issueCode} created successfully! Email notification dispatched.`;
+        this.successMessage = `Complaint ${createdIssue.issueCode} logged successfully! Email notification sent.`;
         setTimeout(() => {
           this.router.navigate(['/issues', createdIssue._id]);
         }, 1500);
       },
       error: (err) => {
         this.submitting = false;
-        this.errorMessage = err.error?.message || 'Failed to create issue.';
+        this.errorMessage = err.error?.message || 'Failed to submit complaint.';
       },
     });
   }

@@ -27,19 +27,61 @@ const issueSchema = new mongoose.Schema(
       type: String,
       unique: true,
     },
+    complaintCategory: {
+      type: String,
+      enum: ['WAYSIDE', 'ONBOARD'],
+      default: 'WAYSIDE',
+      required: true,
+    },
     zone: {
       type: String,
       required: [true, 'Zone is required'],
       trim: true,
     },
-    shed: {
+    contract: {
       type: String,
-      required: [true, 'Shed is required'],
       trim: true,
     },
+    // Wayside Fields
+    station: {
+      type: String,
+      trim: true,
+    },
+    complaintType: {
+      type: String,
+      trim: true,
+    },
+
+    // Onboard Fields
+    shed: {
+      type: String,
+      trim: true,
+    },
+    locoNumber: {
+      type: String,
+      trim: true,
+    },
+    locoType: {
+      type: String,
+      trim: true,
+    },
+    brakeType: {
+      type: String,
+      trim: true,
+    },
+    failureType: {
+      type: String,
+      trim: true,
+    },
+    poLoaNumber: {
+      type: String,
+      trim: true,
+    },
+
+    // Common Fields
     details: {
       type: String,
-      required: [true, 'Issue details are required'],
+      required: [true, 'Complaint description is required'],
       trim: true,
     },
     issueRaisedDate: {
@@ -80,7 +122,7 @@ const issueSchema = new mongoose.Schema(
 issueSchema.pre('save', async function (next) {
   if (!this.issueCode) {
     const count = await mongoose.model('Issue').countDocuments();
-    this.issueCode = `ISS-${1000 + count + 1}`;
+    this.issueCode = `CMP-${1000 + count + 1}`;
   }
   next();
 });

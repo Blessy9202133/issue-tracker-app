@@ -2,7 +2,27 @@
   <div class="form-card">
     <div class="form-header">
       <h2>📌 Log New Customer Complaint</h2>
-      <p>Submit complaint details, attach photos, and assign a technician</p>
+      <p>Select a complaint template (Wayside or Onboard) and fill in the details</p>
+    </div>
+
+    <!-- Template Selector Tabs -->
+    <div class="template-selector">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="complaintCategory === 'WAYSIDE'"
+        (click)="setCategory('WAYSIDE')"
+      >
+        🛤️ Wayside Complaint
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="complaintCategory === 'ONBOARD'"
+        (click)="setCategory('ONBOARD')"
+      >
+        🚆 Onboard Complaint
+      </button>
     </div>
 
     @if (errorMessage) {
@@ -14,103 +34,250 @@
     }
 
     <form (ngSubmit)="onSubmit()" #issueForm="ngForm">
-      <div class="form-grid">
-        <!-- Zone -->
-        <div class="form-group">
-          <label for="zone">Zone <span class="required">*</span></label>
-          <select id="zone" name="zone" [(ngModel)]="zone" class="form-control" required>
-            @for (z of zones; track z) {
-              <option [value]="z">{{ z }}</option>
-            }
-          </select>
+      
+      <!-- ==================== WAYSIDE COMPLAINT TEMPLATE ==================== -->
+      @if (complaintCategory === 'WAYSIDE') {
+        <div class="template-banner wayside-banner">
+          <span>🛤️ Wayside Complaint Form</span>
         </div>
 
-        <!-- Shed -->
+        <div class="form-grid">
+          <!-- Zone -->
+          <div class="form-group">
+            <label for="zone">Zone <span class="required">*</span></label>
+            <select id="zone" name="zone" [(ngModel)]="zone" class="form-control" required>
+              @for (z of zones; track z) {
+                <option [value]="z">{{ z }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Contract -->
+          <div class="form-group">
+            <label for="contract">Contract</label>
+            <input
+              type="text"
+              id="contract"
+              name="contract"
+              [(ngModel)]="contract"
+              placeholder="e.g. CNT-2026-WS01"
+              class="form-control"
+            />
+          </div>
+
+          <!-- Station -->
+          <div class="form-group">
+            <label for="station">Station <span class="required">*</span></label>
+            <input
+              type="text"
+              id="station"
+              name="station"
+              [(ngModel)]="station"
+              placeholder="e.g. Secunderabad Junction"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <!-- Type of Complaint (Dropdown) -->
+          <div class="form-group">
+            <label for="complaintType">Type of Complaint <span class="required">*</span></label>
+            <select id="complaintType" name="complaintType" [(ngModel)]="complaintType" class="form-control" required>
+              @for (type of complaintTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      }
+
+      <!-- ==================== ONBOARD COMPLAINT TEMPLATE ==================== -->
+      @else {
+        <div class="template-banner onboard-banner">
+          <span>🚆 Onboard Complaint Form</span>
+        </div>
+
+        <div class="form-grid">
+          <!-- Zone -->
+          <div class="form-group">
+            <label for="zone">Zone <span class="required">*</span></label>
+            <select id="zone" name="zone" [(ngModel)]="zone" class="form-control" required>
+              @for (z of zones; track z) {
+                <option [value]="z">{{ z }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Contract -->
+          <div class="form-group">
+            <label for="contract">Contract</label>
+            <input
+              type="text"
+              id="contract"
+              name="contract"
+              [(ngModel)]="contract"
+              placeholder="e.g. CNT-2026-OB02"
+              class="form-control"
+            />
+          </div>
+
+          <!-- Shed Name -->
+          <div class="form-group">
+            <label for="shed">Shed Name <span class="required">*</span></label>
+            <input
+              type="text"
+              id="shed"
+              name="shed"
+              [(ngModel)]="shed"
+              placeholder="e.g. Lallaguda Electric Loco Shed"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <!-- Loco Number -->
+          <div class="form-group">
+            <label for="locoNumber">Loco Number <span class="required">*</span></label>
+            <input
+              type="text"
+              id="locoNumber"
+              name="locoNumber"
+              [(ngModel)]="locoNumber"
+              placeholder="e.g. WAP7-30214"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <!-- Loco Type -->
+          <div class="form-group">
+            <label for="locoType">Loco Type</label>
+            <input
+              type="text"
+              id="locoType"
+              name="locoType"
+              [(ngModel)]="locoType"
+              placeholder="e.g. WAP7 / WAG9 / WAP4"
+              class="form-control"
+            />
+          </div>
+
+          <!-- Brake Type -->
+          <div class="form-group">
+            <label for="brakeType">Brake Type</label>
+            <input
+              type="text"
+              id="brakeType"
+              name="brakeType"
+              [(ngModel)]="brakeType"
+              placeholder="e.g. Regenerative / Air Brake"
+              class="form-control"
+            />
+          </div>
+
+          <!-- Failure Type -->
+          <div class="form-group">
+            <label for="failureType">Failure Type</label>
+            <input
+              type="text"
+              id="failureType"
+              name="failureType"
+              [(ngModel)]="failureType"
+              placeholder="e.g. Communication Failure / Sensor Fault"
+              class="form-control"
+            />
+          </div>
+
+          <!-- PO / LOA Number -->
+          <div class="form-group">
+            <label for="poLoaNumber">PO / LOA Number</label>
+            <input
+              type="text"
+              id="poLoaNumber"
+              name="poLoaNumber"
+              [(ngModel)]="poLoaNumber"
+              placeholder="e.g. PO/2026/89421"
+              class="form-control"
+            />
+          </div>
+        </div>
+      }
+
+      <!-- ==================== COMMON FIELDS ==================== -->
+      <div class="common-section">
+        <!-- Raised Date & Assignee -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="issueRaisedDate">Complaint Raised Date <span class="required">*</span></label>
+            <input
+              type="date"
+              id="issueRaisedDate"
+              name="issueRaisedDate"
+              [(ngModel)]="issueRaisedDate"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="assignedTo">Assign To (Will receive email) <span class="required">*</span></label>
+            <select id="assignedTo" name="assignedTo" [(ngModel)]="assignedTo" class="form-control" required>
+              @if (loadingUsers) {
+                <option value="">Loading users...</option>
+              }
+              @for (user of users; track user._id) {
+                <option [value]="user._id">
+                  {{ user.name }} ({{ user.email }}) - {{ user.role }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Complaint Description -->
         <div class="form-group">
-          <label for="shed">Shed Number / Location <span class="required">*</span></label>
-          <input
-            type="text"
-            id="shed"
-            name="shed"
-            [(ngModel)]="shed"
-            placeholder="e.g. Shed 4B or Line 2"
+          <label for="details">Complaint Description <span class="required">*</span></label>
+          <textarea
+            id="details"
+            name="details"
+            rows="4"
+            [(ngModel)]="details"
+            placeholder="Describe the complaint, defect, or failure details..."
             class="form-control"
             required
-          />
+          ></textarea>
         </div>
-      </div>
 
-      <!-- Issue Raised Date -->
-      <div class="form-group">
-        <label for="issueRaisedDate">Complaint Raised Date <span class="required">*</span></label>
-        <input
-          type="date"
-          id="issueRaisedDate"
-          name="issueRaisedDate"
-          [(ngModel)]="issueRaisedDate"
-          class="form-control"
-          required
-        />
-      </div>
+        <!-- File / Photo Upload -->
+        <div class="form-group">
+          <label for="photos">File / Photo Upload</label>
+          <input
+            type="file"
+            id="photos"
+            name="photos"
+            (change)="onFileChange($event)"
+            multiple
+            accept="image/*"
+            class="file-input"
+          />
+          <p class="file-help">You can upload multiple files/photos (JPEG, PNG, WEBP).</p>
 
-      <!-- Assignee -->
-      <div class="form-group">
-        <label for="assignedTo">Assign To (Person will receive an email notification) <span class="required">*</span></label>
-        <select id="assignedTo" name="assignedTo" [(ngModel)]="assignedTo" class="form-control" required>
-          @if (loadingUsers) {
-            <option value="">Loading users...</option>
+          @if (previewUrls.length > 0) {
+            <div class="image-previews">
+              @for (url of previewUrls; track $index) {
+                <div class="preview-item">
+                  <img [src]="url" alt="Preview photo" />
+                </div>
+              }
+            </div>
           }
-          @for (user of users; track user._id) {
-            <option [value]="user._id">
-              {{ user.name }} ({{ user.email }}) - {{ user.role }}
-            </option>
-          }
-        </select>
-      </div>
-
-      <!-- Issue Details -->
-      <div class="form-group">
-        <label for="details">Complaint Description & Details <span class="required">*</span></label>
-        <textarea
-          id="details"
-          name="details"
-          rows="4"
-          [(ngModel)]="details"
-          placeholder="Describe the complaint or defect in detail..."
-          class="form-control"
-          required
-        ></textarea>
-      </div>
-
-      <!-- Photo Attachments -->
-      <div class="form-group">
-        <label for="photos">Upload Photos / Proof</label>
-        <input
-          type="file"
-          id="photos"
-          name="photos"
-          (change)="onFileChange($event)"
-          multiple
-          accept="image/*"
-          class="file-input"
-        />
-        <p class="file-help">You can select multiple photo attachments (JPEG, PNG, WEBP).</p>
-
-        @if (previewUrls.length > 0) {
-          <div class="image-previews">
-            @for (url of previewUrls; track $index) {
-              <div class="preview-item">
-                <img [src]="url" alt="Preview photo" />
-              </div>
-            }
-          </div>
-        }
+        </div>
       </div>
 
       <div class="form-actions">
         <button type="button" routerLink="/dashboard" class="btn-cancel">Cancel</button>
         <button type="submit" [disabled]="submitting" class="btn-submit">
-          {{ submitting ? 'Logging Complaint & Dispatching Email...' : 'Submit Complaint & Send Email Notification' }}
+          {{ submitting ? 'Logging Complaint...' : 'Submit Complaint & Send Email Notification' }}
         </button>
       </div>
     </form>

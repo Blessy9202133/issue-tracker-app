@@ -2,15 +2,30 @@ const Issue = require('../models/Issue');
 const User = require('../models/User');
 const { sendIssueAssignmentEmail } = require('../config/mailer');
 
-// @desc    Create a new issue with photos
+// @desc    Create a new customer complaint (Wayside or Onboard template)
 // @route   POST /api/issues
 // @access  Private
 const createIssue = async (req, res) => {
   try {
-    const { zone, shed, details, issueRaisedDate, assignedTo } = req.body;
+    const {
+      complaintCategory,
+      zone,
+      contract,
+      station,
+      complaintType,
+      shed,
+      locoNumber,
+      locoType,
+      brakeType,
+      failureType,
+      poLoaNumber,
+      details,
+      issueRaisedDate,
+      assignedTo,
+    } = req.body;
 
-    if (!zone || !shed || !details || !assignedTo) {
-      return res.status(400).json({ message: 'Zone, Shed, Details, and Assignee are required' });
+    if (!zone || !details || !assignedTo) {
+      return res.status(400).json({ message: 'Zone, Complaint description, and Assignee are required' });
     }
 
     // Process uploaded photo paths
@@ -19,43 +34,57 @@ const createIssue = async (req, res) => {
       photos = req.files.map((file) => `/uploads/${file.filename}`);
     }
 
-    const issue = await Issue.create({
+    const issueData = {
+      complaintCategory: complaintCategory || 'WAYSIDE',
       zone,
+      contract,
+      station,
+      complaintType,
       shed,
+      locoNumber,
+      locoType,
+      brakeType,
+      failureType,
+      poLoaNumber,
       details,
       issueRaisedDate: issueRaisedDate || Date.now(),
       photos,
       assignedTo,
       createdBy: req.user._id,
       status: 'OPEN',
-    });
+    };
+
+    const issue = await Issue.create(issueData);
 
     const populatedIssue = await Issue.findById(issue._id)
       .populate('createdBy', 'name email')
       .populate('assignedTo', 'name email');
 
-    // Send email notification to assignee asynchronously
+    // Send email notification asynchronously
     if (populatedIssue.assignedTo && populatedIssue.assignedTo.email) {
       sendIssueAssignmentEmail(populatedIssue, populatedIssue.assignedTo);
     }
 
     res.status(201).json(populatedIssue);
   } catch (error) {
-    console.error('Error creating issue:', error);
+    console.error('Error creating complaint:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Get all issues (with optional filtering)
+// @desc    Get all complaints (with filtering)
 // @route   GET /api/issues
 // @access  Private
 const getIssues = async (req, res) => {
   try {
-    const { status, zone, shed, assignedToMe } = req.query;
+    const { status, zone, shed, complaintCategory, assignedToMe } = req.query;
     let query = {};
 
     if (status) {
       query.status = status;
+    }
+    if (complaintCategory) {
+      query.complaintCategory = complaintCategory;
     }
     if (zone) {
       query.zone = { $regex: zone, $options: 'i' };
@@ -79,7 +108,7 @@ const getIssues = async (req, res) => {
   }
 };
 
-// @desc    Get single issue by ID
+// @desc    Get single complaint by ID
 // @route   GET /api/issues/:id
 // @access  Private
 const getIssueById = async (req, res) => {
@@ -90,7 +119,7 @@ const getIssueById = async (req, res) => {
       .populate('comments.user', 'name email role');
 
     if (!issue) {
-      return res.status(404).json({ message: 'Issue not found' });
+      return res.status(404).json({ message: 'Complaint not found' });
     }
 
     res.json(issue);
@@ -99,7 +128,7 @@ const getIssueById = async (req, res) => {
   }
 };
 
-// @desc    Respond to issue (Add comment, set expected completion date, update status)
+// @desc    Respond to complaint
 // @route   PUT /api/issues/:id/respond
 // @access  Private
 const respondToIssue = async (req, res) => {
@@ -109,7 +138,7 @@ const respondToIssue = async (req, res) => {
     const issue = await Issue.findById(req.params.id);
 
     if (!issue) {
-      return res.status(404).json({ message: 'Issue not found' });
+      return res.status(404).json({ message: 'Complaint not found' });
     }
 
     if (status) {

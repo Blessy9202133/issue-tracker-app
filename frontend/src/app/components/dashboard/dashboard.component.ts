@@ -19,6 +19,7 @@ export class DashboardComponent implements OnInit {
 
   // Filters
   statusFilter = '';
+  complaintCategoryFilter = '';
   zoneFilter = '';
   shedFilter = '';
   assignedToMeFilter = false;
@@ -35,6 +36,7 @@ export class DashboardComponent implements OnInit {
     this.issueService
       .getIssues({
         status: this.statusFilter,
+        complaintCategory: this.complaintCategoryFilter,
         zone: this.zoneFilter,
         shed: this.shedFilter,
         assignedToMe: this.assignedToMeFilter,
@@ -45,7 +47,7 @@ export class DashboardComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          console.error('Error loading issues:', err);
+          console.error('Error loading complaints:', err);
           this.loading = false;
         },
       });

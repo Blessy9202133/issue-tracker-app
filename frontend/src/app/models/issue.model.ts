@@ -11,8 +11,17 @@ export interface Comment {
 export interface Issue {
   _id: string;
   issueCode: string;
+  complaintCategory: 'WAYSIDE' | 'ONBOARD';
   zone: string;
-  shed: string;
+  contract?: string;
+  station?: string;
+  complaintType?: string;
+  shed?: string;
+  locoNumber?: string;
+  locoType?: string;
+  brakeType?: string;
+  failureType?: string;
+  poLoaNumber?: string;
   details: string;
   issueRaisedDate: string;
   expectedCompletionDate?: string;
@@ -26,8 +35,17 @@ export interface Issue {
 }
 
 export interface CreateIssueDto {
+  complaintCategory: 'WAYSIDE' | 'ONBOARD';
   zone: string;
-  shed: string;
+  contract?: string;
+  station?: string;
+  complaintType?: string;
+  shed?: string;
+  locoNumber?: string;
+  locoType?: string;
+  brakeType?: string;
+  failureType?: string;
+  poLoaNumber?: string;
   details: string;
   issueRaisedDate?: string;
   assignedTo: string;

@@ -18,10 +18,17 @@ export class IssueService {
     });
   }
 
-  getIssues(filters?: { status?: string; zone?: string; shed?: string; assignedToMe?: boolean }): Observable<Issue[]> {
+  getIssues(filters?: {
+    status?: string;
+    complaintCategory?: string;
+    zone?: string;
+    shed?: string;
+    assignedToMe?: boolean;
+  }): Observable<Issue[]> {
     let params = new HttpParams();
     if (filters) {
       if (filters.status) params = params.set('status', filters.status);
+      if (filters.complaintCategory) params = params.set('complaintCategory', filters.complaintCategory);
       if (filters.zone) params = params.set('zone', filters.zone);
       if (filters.shed) params = params.set('shed', filters.shed);
       if (filters.assignedToMe) params = params.set('assignedToMe', 'true');
