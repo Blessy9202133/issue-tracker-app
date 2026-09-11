@@ -28,7 +28,7 @@ export class CreateIssueComponent implements OnInit {
 
   // Wayside Fields
   station = '';
-  complaintType = 'Application Related';
+  complaintType = 'NMS';
 
   // Onboard Fields
   shed = '';
@@ -69,10 +69,6 @@ export class CreateIssueComponent implements OnInit {
   complaintTypes = [
     'NMS',
     'Application Related',
-    'Hardware Defect',
-    'Network/Communication',
-    'Power Supply Issue',
-    'Software Bug',
     'Others',
   ];
 

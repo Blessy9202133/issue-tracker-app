@@ -1,7 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { IssueService } from '../../services/issue.service';
 import { AuthService } from '../../services/auth.service';
 import { Issue } from '../../models/issue.model';
@@ -14,8 +14,10 @@ import { Issue } from '../../models/issue.model';
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
-  issues: Issue[] = [];
-  loading = true;
+  // Angular Signals for instant template rendering
+  issues = signal<Issue[]>([]);
+  loading = signal<boolean>(true);
+  errorMessage = signal<string>('');
 
   // Filters
   statusFilter = '';
@@ -23,6 +25,12 @@ export class DashboardComponent implements OnInit {
   zoneFilter = '';
   shedFilter = '';
   assignedToMeFilter = false;
+
+  // Computed metrics from reactive signal
+  totalCount = computed(() => this.issues().length);
+  openCount = computed(() => this.issues().filter((i) => i.status === 'OPEN').length);
+  inProgressCount = computed(() => this.issues().filter((i) => i.status === 'IN_PROGRESS').length);
+  resolvedCount = computed(() => this.issues().filter((i) => i.status === 'RESOLVED' || i.status === 'CLOSED').length);
 
   zones = [
     'Central Railway',
@@ -48,13 +56,18 @@ export class DashboardComponent implements OnInit {
 
   private issueService = inject(IssueService);
   authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   ngOnInit(): void {
     this.fetchIssues();
   }
 
   fetchIssues(): void {
-    this.loading = true;
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.cdr.markForCheck();
+
     this.issueService
       .getIssues({
         status: this.statusFilter,
@@ -64,13 +77,25 @@ export class DashboardComponent implements OnInit {
         assignedToMe: this.assignedToMeFilter,
       })
       .subscribe({
-        next: (issues) => {
-          this.issues = issues;
-          this.loading = false;
+        next: (issuesList) => {
+          this.issues.set(issuesList || []);
+          this.loading.set(false);
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Error loading complaints:', err);
-          this.loading = false;
+          console.error('Error loading complaints on dashboard:', err);
+          this.loading.set(false);
+          if (err.status === 401) {
+            this.authService.logout();
+            this.router.navigate(['/login']);
+          } else if (err.status === 0) {
+            this.errorMessage.set('Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev');
+          } else {
+            this.errorMessage.set(err.error?.message || 'Failed to load complaints from server.');
+          }
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
         },
       });
   }
@@ -92,18 +117,5 @@ export class DashboardComponent implements OnInit {
       default:
         return '';
     }
-  }
-
-  get totalCount(): number {
-    return this.issues.length;
-  }
-  get openCount(): number {
-    return this.issues.filter((i) => i.status === 'OPEN').length;
-  }
-  get inProgressCount(): number {
-    return this.issues.filter((i) => i.status === 'IN_PROGRESS').length;
-  }
-  get resolvedCount(): number {
-    return this.issues.filter((i) => i.status === 'RESOLVED' || i.status === 'CLOSED').length;
   }
 }
