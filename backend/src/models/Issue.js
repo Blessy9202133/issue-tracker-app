@@ -118,8 +118,7 @@ const issueSchema = new mongoose.Schema(
   }
 );
 
-// Indexes for ultra-fast query performance (1-5ms)
-issueSchema.index({ issueCode: 1 });
+// Indexes for ultra-fast query performance
 issueSchema.index({ status: 1 });
 issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ zone: 1 });

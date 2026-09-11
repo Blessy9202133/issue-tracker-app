@@ -1,7 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { IssueService } from '../../services/issue.service';
 import { AuthService } from '../../services/auth.service';
 import { Issue } from '../../models/issue.model';
@@ -14,7 +16,7 @@ import { User } from '../../models/user.model';
   templateUrl: './issue-detail.component.html',
   styleUrl: './issue-detail.component.css',
 })
-export class IssueDetailComponent implements OnInit {
+export class IssueDetailComponent implements OnInit, OnDestroy {
   issue: Issue | null = null;
   loading = true;
   errorMessage = '';
@@ -33,54 +35,71 @@ export class IssueDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private issueService = inject(IssueService);
   authService = inject(AuthService);
+  private routeSub: Subscription | null = null;
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
     this.loadUsers();
-    if (id) {
-      this.loadIssue(id);
-    } else {
-      this.loading = false;
-      this.errorMessage = 'Invalid complaint ID.';
+    this.routeSub = this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      if (id) {
+        this.loadIssue(id);
+      } else {
+        this.loading = false;
+        this.errorMessage = 'Invalid complaint ID.';
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.routeSub) {
+      this.routeSub.unsubscribe();
     }
   }
 
   loadUsers(): void {
-    this.authService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-      },
-      error: (err) => console.error('Error fetching users for re-assignment:', err),
-    });
+    this.authService
+      .getUsers()
+      .pipe(timeout(5000))
+      .subscribe({
+        next: (users) => {
+          this.users = users;
+        },
+        error: (err) => console.error('Error fetching users for re-assignment:', err),
+      });
   }
 
   loadIssue(id: string): void {
     this.loading = true;
     this.errorMessage = '';
-    this.issueService.getIssueById(id).subscribe({
-      next: (issue) => {
-        this.issue = issue;
-        if (issue) {
-          this.status = issue.status || 'OPEN';
-          this.reassignTo = issue.assignedTo?._id || '';
-          if (issue.expectedCompletionDate) {
-            this.expectedCompletionDate = new Date(issue.expectedCompletionDate)
-              .toISOString()
-              .substring(0, 10);
+    this.issueService
+      .getIssueById(id)
+      .pipe(timeout(5000)) // 5 second max HTTP timeout
+      .subscribe({
+        next: (issue) => {
+          this.issue = issue;
+          if (issue) {
+            this.status = issue.status || 'OPEN';
+            this.reassignTo = issue.assignedTo?._id || '';
+            if (issue.expectedCompletionDate) {
+              this.expectedCompletionDate = new Date(issue.expectedCompletionDate)
+                .toISOString()
+                .substring(0, 10);
+            }
           }
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error fetching complaint details:', err);
-        this.loading = false;
-        if (err.status === 0) {
-          this.errorMessage = 'Backend API server on http://localhost:5000 is not running. Please start the backend using: cd backend && npm run dev';
-        } else {
-          this.errorMessage = err.error?.message || 'Failed to load complaint details from server.';
-        }
-      },
-    });
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error('Error fetching complaint details:', err);
+          this.loading = false;
+          if (err.name === 'TimeoutError') {
+            this.errorMessage = 'Request timed out connecting to backend server at http://localhost:5000. Please ensure the backend server is running.';
+          } else if (err.status === 0) {
+            this.errorMessage = 'Backend API server on http://localhost:5000 is not running. Please start the backend using: cd backend && npm run dev';
+          } else {
+            this.errorMessage = err.error?.message || 'Failed to load complaint details from server.';
+          }
+        },
+      });
   }
 
   onSubmitResponse(): void {
@@ -104,13 +123,14 @@ export class IssueDetailComponent implements OnInit {
         status: this.status,
         reassignTo: this.reassignTo,
       })
+      .pipe(timeout(5000))
       .subscribe({
         next: (updatedIssue) => {
           this.issue = updatedIssue;
           this.comment = '';
           this.submitting = false;
           this.successMessage = isReassigned
-            ? `Complaint re-assigned & notification sent to ${updatedIssue.assignedTo?.name} (${updatedIssue.assignedTo?.department || 'Department'})!`
+            ? `Complaint re-assigned & notification logged for ${updatedIssue.assignedTo?.name} (${updatedIssue.assignedTo?.department || 'Department'})!`
             : 'Response submitted successfully!';
         },
         error: (err) => {
