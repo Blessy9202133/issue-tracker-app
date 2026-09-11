@@ -124,8 +124,9 @@ export class CreateIssueComponent implements OnInit {
         this.users = users;
         this.loadingUsers = false;
         if (users.length > 0) {
-          const defaultAssignee = users.find((u) => u.role === 'ASSIGNEE') || users[0];
-          this.assignedTo = defaultAssignee._id;
+          // Default to HBL Admin user if present, else first user
+          const adminUser = users.find((u) => u.role === 'ADMIN' || u.email === 'admin@hbl.com' || u.name.includes('HBL'));
+          this.assignedTo = adminUser ? adminUser._id : users[0]._id;
         }
       },
       error: (err) => {
@@ -156,8 +157,8 @@ export class CreateIssueComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.zone || !this.details || !this.assignedTo) {
-      this.errorMessage = 'Please complete all required fields (Zone, Description, and Assignee).';
+    if (!this.zone || !this.details) {
+      this.errorMessage = 'Please complete all required fields (Zone and Description).';
       return;
     }
 
@@ -202,7 +203,7 @@ export class CreateIssueComponent implements OnInit {
     this.issueService.createIssue(formData).subscribe({
       next: (createdIssue) => {
         this.submitting = false;
-        this.successMessage = `Complaint ${createdIssue.issueCode} logged successfully! Email notification sent.`;
+        this.successMessage = `Complaint ${createdIssue.issueCode} logged successfully! Routed to HBL Admin for department allocation.`;
         setTimeout(() => {
           this.router.navigate(['/issues', createdIssue._id]);
         }, 1500);

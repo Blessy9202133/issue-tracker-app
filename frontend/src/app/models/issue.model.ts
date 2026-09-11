@@ -48,7 +48,7 @@ export interface CreateIssueDto {
   poLoaNumber?: string;
   details: string;
   issueRaisedDate?: string;
-  assignedTo: string;
+  assignedTo?: string;
   photos?: File[];
 }
 
@@ -56,4 +56,5 @@ export interface RespondIssueDto {
   comment?: string;
   expectedCompletionDate?: string;
   status?: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  reassignTo?: string;
 }

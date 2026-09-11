@@ -174,6 +174,18 @@
   color: #334155;
   margin-bottom: 0.4rem;
 }
+.highlight-box {
+  background-color: #eff6ff;
+  padding: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+}
+.field-tip {
+  font-size: 0.75rem;
+  color: #1e40af;
+  margin-top: 0.3rem;
+  display: block;
+}
 .form-control {
   width: 100%;
   padding: 0.65rem 0.85rem;

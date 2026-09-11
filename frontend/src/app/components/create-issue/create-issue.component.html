@@ -25,6 +25,10 @@
       </button>
     </div>
 
+    <div class="routing-notice">
+      ℹ️ <strong>Default Routing:</strong> All new complaints are automatically routed to <strong>HBL Admin</strong>. HBL Admin will review the complaint and allocate it to the respective department/person.
+    </div>
+
     @if (errorMessage) {
       <div class="alert alert-error">{{ errorMessage }}</div>
     }
@@ -201,7 +205,7 @@
 
       <!-- ==================== COMMON FIELDS ==================== -->
       <div class="common-section">
-        <!-- Raised Date & Assignee -->
+        <!-- Raised Date & Initial Assignee -->
         <div class="form-grid">
           <div class="form-group">
             <label for="issueRaisedDate">Complaint Raised Date <span class="required">*</span></label>
@@ -216,14 +220,14 @@
           </div>
 
           <div class="form-group">
-            <label for="assignedTo">Assign To (Will receive email) <span class="required">*</span></label>
+            <label for="assignedTo">Assigned To (Default: HBL Admin) <span class="required">*</span></label>
             <select id="assignedTo" name="assignedTo" [(ngModel)]="assignedTo" class="form-control" required>
               @if (loadingUsers) {
                 <option value="">Loading users...</option>
               }
               @for (user of users; track user._id) {
                 <option [value]="user._id">
-                  {{ user.name }} ({{ user.email }}) - {{ user.role }}
+                  {{ user.name }} ({{ user.email }}) — {{ user.department || user.role }}
                 </option>
               }
             </select>
@@ -273,7 +277,7 @@
       <div class="form-actions">
         <button type="button" routerLink="/dashboard" class="btn-cancel">Cancel</button>
         <button type="submit" [disabled]="submitting" class="btn-submit">
-          {{ submitting ? 'Logging Complaint...' : 'Submit Complaint & Send Email Notification' }}
+          {{ submitting ? 'Logging Complaint...' : 'Submit Complaint to HBL Admin' }}
         </button>
       </div>
     </form>

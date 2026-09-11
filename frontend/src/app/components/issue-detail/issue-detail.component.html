@@ -13,7 +13,7 @@
         <div class="code-and-cat">
           <span class="issue-code">{{ issue.issueCode }}</span>
           <span class="category-badge" [class.badge-wayside]="issue.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="issue.complaintCategory === 'ONBOARD'">
-            {{ issue.complaintCategory === 'WAYSIDE' ? '🛤️ Wayside Complaint' : '🚆 Onboard Complaint' }}
+            {{ issue.complaintCategory === 'WAYSIDE' ? '🛤️ Wayside Complaint' : '膜 Onboard Complaint' }}
           </span>
         </div>
         <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
@@ -71,8 +71,8 @@
           <span class="meta-val">{{ issue.createdBy?.name || 'N/A' }} ({{ issue.createdBy?.email || 'N/A' }})</span>
         </div>
         <div class="meta-item">
-          <span class="meta-label">Assigned To:</span>
-          <span class="meta-val">{{ issue.assignedTo?.name || 'Unassigned' }} ({{ issue.assignedTo?.email || 'N/A' }})</span>
+          <span class="meta-label">Currently Assigned To:</span>
+          <span class="meta-val highlight">{{ issue.assignedTo?.name || 'Unassigned' }} ({{ issue.assignedTo?.department || 'Department' }})</span>
         </div>
       </div>
     </div>
@@ -111,7 +111,7 @@
                 <div class="timeline-item">
                   <div class="timeline-header">
                     <strong>{{ c.user?.name || 'User' }}</strong>
-                    <span class="role-badge">{{ c.user?.role || 'User' }}</span>
+                    <span class="role-badge">{{ c.user?.department || c.user?.role }}</span>
                     <span class="time">{{ c.createdAt | date: 'short' }}</span>
                   </div>
                   <p class="comment-body">{{ c.comment }}</p>
@@ -129,11 +129,11 @@
         </div>
       </div>
 
-      <!-- Right Column: Response Action Form -->
+      <!-- Right Column: Response & Department Re-Assignment Form -->
       <div class="right-col">
         <div class="card response-card">
-          <h3>✍️ Submit Response</h3>
-          <p class="sub-text">Add your findings, update completion date, or change status.</p>
+          <h3>✍️ Department Action & Response</h3>
+          <p class="sub-text">HBL Admin / Technicians can allocate department, add findings, or update status.</p>
 
           @if (errorMessage) {
             <div class="alert alert-error">{{ errorMessage }}</div>
@@ -143,6 +143,19 @@
           }
 
           <form (ngSubmit)="onSubmitResponse()">
+            <!-- Department Allocation / Re-Assignment Dropdown -->
+            <div class="form-group highlight-box">
+              <label for="reassignTo">🏢 Allocate / Re-assign Department</label>
+              <select id="reassignTo" name="reassignTo" [(ngModel)]="reassignTo" class="form-control">
+                @for (u of users; track u._id) {
+                  <option [value]="u._id">
+                    {{ u.name }} ({{ u.department || u.role }}) — {{ u.email }}
+                  </option>
+                }
+              </select>
+              <span class="field-tip">Re-assigning dispatches an email notification to the selected department/person.</span>
+            </div>
+
             <div class="form-group">
               <label for="status">Update Status</label>
               <select id="status" name="status" [(ngModel)]="status" class="form-control">
@@ -171,13 +184,13 @@
                 name="comment"
                 rows="4"
                 [(ngModel)]="comment"
-                placeholder="Write your inspection findings, action taken, or parts status..."
+                placeholder="Write inspection findings, department comments, or action taken..."
                 class="form-control"
               ></textarea>
             </div>
 
             <button type="submit" [disabled]="submitting" class="btn-submit">
-              {{ submitting ? 'Updating Complaint...' : 'Submit Response & Update' }}
+              {{ submitting ? 'Updating...' : 'Submit Action & Update Assignee' }}
             </button>
           </form>
         </div>

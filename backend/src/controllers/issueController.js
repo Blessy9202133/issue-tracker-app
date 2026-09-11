@@ -2,7 +2,7 @@ const Issue = require('../models/Issue');
 const User = require('../models/User');
 const { sendIssueAssignmentEmail } = require('../config/mailer');
 
-// @desc    Create a new customer complaint (Wayside or Onboard template)
+// @desc    Create a new customer complaint (Defaults to HBL Admin assignment)
 // @route   POST /api/issues
 // @access  Private
 const createIssue = async (req, res) => {
@@ -24,8 +24,21 @@ const createIssue = async (req, res) => {
       assignedTo,
     } = req.body;
 
-    if (!zone || !details || !assignedTo) {
-      return res.status(400).json({ message: 'Zone, Complaint description, and Assignee are required' });
+    if (!zone || !details) {
+      return res.status(400).json({ message: 'Zone and Complaint description are required' });
+    }
+
+    // Default to HBL Admin if assignedTo is not specified
+    let targetAssigneeId = assignedTo;
+    if (!targetAssigneeId) {
+      const adminUser = await User.findOne({ $or: [{ role: 'ADMIN' }, { email: 'admin@hbl.com' }] });
+      if (adminUser) {
+        targetAssigneeId = adminUser._id;
+      } else {
+        // Fallback to first available user
+        const anyUser = await User.findOne();
+        targetAssigneeId = anyUser ? anyUser._id : req.user._id;
+      }
     }
 
     // Process uploaded photo paths
@@ -49,7 +62,7 @@ const createIssue = async (req, res) => {
       details,
       issueRaisedDate: issueRaisedDate || Date.now(),
       photos,
-      assignedTo,
+      assignedTo: targetAssigneeId,
       createdBy: req.user._id,
       status: 'OPEN',
     };
@@ -57,8 +70,8 @@ const createIssue = async (req, res) => {
     const issue = await Issue.create(issueData);
 
     const populatedIssue = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email')
-      .populate('assignedTo', 'name email');
+      .populate('createdBy', 'name email department')
+      .populate('assignedTo', 'name email department');
 
     // Send email notification asynchronously
     if (populatedIssue.assignedTo && populatedIssue.assignedTo.email) {
@@ -72,7 +85,7 @@ const createIssue = async (req, res) => {
   }
 };
 
-// @desc    Get all complaints (with filtering)
+// @desc    Get all complaints
 // @route   GET /api/issues
 // @access  Private
 const getIssues = async (req, res) => {
@@ -97,9 +110,9 @@ const getIssues = async (req, res) => {
     }
 
     const issues = await Issue.find(query)
-      .populate('createdBy', 'name email')
-      .populate('assignedTo', 'name email')
-      .populate('comments.user', 'name email')
+      .populate('createdBy', 'name email department')
+      .populate('assignedTo', 'name email department')
+      .populate('comments.user', 'name email department')
       .sort({ createdAt: -1 });
 
     res.json(issues);
@@ -114,9 +127,9 @@ const getIssues = async (req, res) => {
 const getIssueById = async (req, res) => {
   try {
     const issue = await Issue.findById(req.params.id)
-      .populate('createdBy', 'name email')
-      .populate('assignedTo', 'name email')
-      .populate('comments.user', 'name email role');
+      .populate('createdBy', 'name email department')
+      .populate('assignedTo', 'name email department')
+      .populate('comments.user', 'name email role department');
 
     if (!issue) {
       return res.status(404).json({ message: 'Complaint not found' });
@@ -128,17 +141,26 @@ const getIssueById = async (req, res) => {
   }
 };
 
-// @desc    Respond to complaint
+// @desc    Respond to complaint & allocate/reassign to department
 // @route   PUT /api/issues/:id/respond
 // @access  Private
 const respondToIssue = async (req, res) => {
   try {
-    const { comment, targetDate, status, expectedCompletionDate } = req.body;
+    const { comment, targetDate, status, expectedCompletionDate, reassignTo } = req.body;
 
     const issue = await Issue.findById(req.params.id);
 
     if (!issue) {
       return res.status(404).json({ message: 'Complaint not found' });
+    }
+
+    let reassigned = false;
+    let newAssigneeUser = null;
+
+    if (reassignTo && reassignTo.toString() !== issue.assignedTo.toString()) {
+      issue.assignedTo = reassignTo;
+      reassigned = true;
+      newAssigneeUser = await User.findById(reassignTo);
     }
 
     if (status) {
@@ -149,10 +171,14 @@ const respondToIssue = async (req, res) => {
       issue.expectedCompletionDate = expectedCompletionDate;
     }
 
-    if (comment) {
+    if (comment || reassigned) {
+      const commentText = comment
+        ? (reassigned ? `[Re-assigned to ${newAssigneeUser?.name} (${newAssigneeUser?.department})] - ${comment}` : comment)
+        : `Re-assigned complaint to ${newAssigneeUser?.name} (${newAssigneeUser?.department})`;
+
       issue.comments.push({
         user: req.user._id,
-        comment,
+        comment: commentText,
         targetDate: targetDate || expectedCompletionDate,
       });
     }
@@ -160,9 +186,14 @@ const respondToIssue = async (req, res) => {
     await issue.save();
 
     const updatedIssue = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email')
-      .populate('assignedTo', 'name email')
-      .populate('comments.user', 'name email role');
+      .populate('createdBy', 'name email department')
+      .populate('assignedTo', 'name email department')
+      .populate('comments.user', 'name email role department');
+
+    // If reassigned, send email notification to new assignee
+    if (reassigned && newAssigneeUser && newAssigneeUser.email) {
+      sendIssueAssignmentEmail(updatedIssue, newAssigneeUser);
+    }
 
     res.json(updatedIssue);
   } catch (error) {

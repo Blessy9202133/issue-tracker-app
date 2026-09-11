@@ -36,13 +36,23 @@ const seedUsers = async () => {
   try {
     const userCount = await User.countDocuments();
     if (userCount === 0) {
-      console.log('Seeding initial portal users...');
+      console.log('Seeding initial HBL Portal users...');
       await User.create([
+        {
+          name: 'HBL Admin',
+          email: 'admin@hbl.com',
+          username: 'hbladmin',
+          phoneNumber: '9876543200',
+          department: 'HBL Admin',
+          password: 'password123',
+          role: 'ADMIN',
+        },
         {
           name: 'Sushma',
           email: 'abc@hbl.com',
           username: 'sushma',
           phoneNumber: '9876543210',
+          department: 'Customer Desk',
           password: 'password123',
           role: 'REPORTER',
         },
@@ -51,22 +61,25 @@ const seedUsers = async () => {
           email: 'xyz@hbl.com',
           username: 'jahnavi',
           phoneNumber: '9876543211',
+          department: 'Software Department',
           password: 'password123',
           role: 'ASSIGNEE',
         },
         {
           name: 'prabhakar',
-          email: 'admin@hbl.com',
+          email: 'prabhakar@hbl.com',
           username: 'prabhakar',
           phoneNumber: '9876543212',
+          department: 'Hardware Department',
           password: 'password123',
           role: 'ASSIGNEE',
         },
       ]);
-      console.log('Portal users seeded:');
-      console.log(' - Sushma (abc@hbl.com / sushma)');
-      console.log(' - jahnavi (xyz@hbl.com / jahnavi)');
-      console.log(' - prabhakar (admin@hbl.com / prabhakar)');
+      console.log('HBL Portal users seeded:');
+      console.log(' - HBL Admin (admin@hbl.com / hbladmin) - ADMIN');
+      console.log(' - Sushma (abc@hbl.com / sushma) - REPORTER');
+      console.log(' - jahnavi (xyz@hbl.com / jahnavi) - ASSIGNEE (Software)');
+      console.log(' - prabhakar (prabhakar@hbl.com / prabhakar) - ASSIGNEE (Hardware)');
     }
   } catch (err) {
     console.error('Error seeding users:', err.message);

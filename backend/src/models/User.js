@@ -18,12 +18,17 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       unique: true,
-      sparse: true, // Allows null/missing values for existing database records
+      sparse: true,
       lowercase: true,
       trim: true,
     },
     phoneNumber: {
       type: String,
+      trim: true,
+    },
+    department: {
+      type: String,
+      default: 'General',
       trim: true,
     },
     password: {

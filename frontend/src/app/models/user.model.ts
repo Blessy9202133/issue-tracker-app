@@ -4,6 +4,7 @@ export interface User {
   email: string;
   username: string;
   phoneNumber: string;
+  department?: string;
   role: 'REPORTER' | 'ASSIGNEE' | 'ADMIN';
   token?: string;
 }
@@ -14,6 +15,7 @@ export interface AuthResponse {
   email: string;
   username: string;
   phoneNumber: string;
+  department?: string;
   role: 'REPORTER' | 'ASSIGNEE' | 'ADMIN';
   token: string;
 }

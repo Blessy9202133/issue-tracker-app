@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IssueService } from '../../services/issue.service';
 import { AuthService } from '../../services/auth.service';
 import { Issue } from '../../models/issue.model';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-issue-detail',
@@ -17,6 +18,10 @@ export class IssueDetailComponent implements OnInit {
   issue: Issue | null = null;
   loading = true;
   errorMessage = '';
+
+  // Users list for department re-assignment
+  users: User[] = [];
+  reassignTo = '';
 
   // Response Form
   comment = '';
@@ -31,12 +36,22 @@ export class IssueDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    this.loadUsers();
     if (id) {
       this.loadIssue(id);
     } else {
       this.loading = false;
       this.errorMessage = 'Invalid complaint ID.';
     }
+  }
+
+  loadUsers(): void {
+    this.authService.getUsers().subscribe({
+      next: (users) => {
+        this.users = users;
+      },
+      error: (err) => console.error('Error fetching users for re-assignment:', err),
+    });
   }
 
   loadIssue(id: string): void {
@@ -47,6 +62,7 @@ export class IssueDetailComponent implements OnInit {
         this.issue = issue;
         if (issue) {
           this.status = issue.status || 'OPEN';
+          this.reassignTo = issue.assignedTo?._id || '';
           if (issue.expectedCompletionDate) {
             this.expectedCompletionDate = new Date(issue.expectedCompletionDate)
               .toISOString()
@@ -69,8 +85,11 @@ export class IssueDetailComponent implements OnInit {
 
   onSubmitResponse(): void {
     if (!this.issue) return;
-    if (!this.comment && !this.expectedCompletionDate && this.status === this.issue.status) {
-      this.errorMessage = 'Please provide a comment or update the status/completion date.';
+    
+    const isReassigned = this.reassignTo && this.reassignTo !== this.issue.assignedTo?._id;
+
+    if (!this.comment && !this.expectedCompletionDate && !isReassigned && this.status === this.issue.status) {
+      this.errorMessage = 'Please provide a comment, update completion date, change status, or re-assign to a department.';
       return;
     }
 
@@ -83,13 +102,16 @@ export class IssueDetailComponent implements OnInit {
         comment: this.comment,
         expectedCompletionDate: this.expectedCompletionDate,
         status: this.status,
+        reassignTo: this.reassignTo,
       })
       .subscribe({
         next: (updatedIssue) => {
           this.issue = updatedIssue;
           this.comment = '';
           this.submitting = false;
-          this.successMessage = 'Response submitted successfully!';
+          this.successMessage = isReassigned
+            ? `Complaint re-assigned & notification sent to ${updatedIssue.assignedTo?.name} (${updatedIssue.assignedTo?.department || 'Department'})!`
+            : 'Response submitted successfully!';
         },
         error: (err) => {
           this.submitting = false;
