@@ -118,6 +118,13 @@ const issueSchema = new mongoose.Schema(
   }
 );
 
+// Indexes for ultra-fast query performance (1-5ms)
+issueSchema.index({ issueCode: 1 });
+issueSchema.index({ status: 1 });
+issueSchema.index({ assignedTo: 1 });
+issueSchema.index({ zone: 1 });
+issueSchema.index({ complaintCategory: 1 });
+
 // Auto generate issueCode before saving
 issueSchema.pre('save', async function (next) {
   if (!this.issueCode) {
