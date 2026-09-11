@@ -22,7 +22,7 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (!this.username || !this.password) {
-      this.errorMessage = 'Please enter your username and password';
+      this.errorMessage = 'Please enter your username/email and password';
       return;
     }
 
@@ -41,8 +41,8 @@ export class LoginComponent {
     });
   }
 
-  fillDemo(username: string): void {
-    this.username = username;
+  fillDemo(identifier: string): void {
+    this.username = identifier;
     this.password = 'password123';
   }
 }
