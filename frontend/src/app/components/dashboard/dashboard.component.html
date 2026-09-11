@@ -50,14 +50,13 @@
     </div>
 
     <div class="filter-group">
-      <label>Zone Search</label>
-      <input
-        type="text"
-        [(ngModel)]="zoneFilter"
-        (input)="onFilterChange()"
-        placeholder="Filter by zone..."
-        class="filter-control"
-      />
+      <label>Railway Zone</label>
+      <select [(ngModel)]="zoneFilter" (change)="onFilterChange()" class="filter-control">
+        <option value="">All Zones</option>
+        @for (z of zones; track z) {
+          <option [value]="z">{{ z }}</option>
+        }
+      </select>
     </div>
 
     <div class="filter-group filter-checkbox">

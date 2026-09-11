@@ -18,7 +18,7 @@ export class CreateIssueComponent implements OnInit {
   complaintCategory: 'WAYSIDE' | 'ONBOARD' = 'WAYSIDE';
 
   // Common Fields
-  zone = 'North Zone';
+  zone = 'South Central Railway';
   contract = '';
   details = '';
   issueRaisedDate = new Date().toISOString().substring(0, 10);
@@ -44,7 +44,27 @@ export class CreateIssueComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
-  zones = ['North Zone', 'South Zone', 'East Zone', 'West Zone', 'Central Zone', 'SCR', 'SR', 'WR', 'NR'];
+  zones = [
+    'Central Railway',
+    'Konkan Railway',
+    'Metro Railway in Kolkata',
+    'Northern Railway',
+    'North Central Railway',
+    'North Eastern Railway',
+    'Northeast Frontier Railway',
+    'North Western Railway',
+    'Eastern Railway',
+    'East Central Railway',
+    'East Coast Railway',
+    'Southern Railway',
+    'South Central Railway',
+    'South Coast Railway',
+    'South Eastern Railway',
+    'South East Central Railway',
+    'South Western Railway',
+    'Western Railway',
+    'West Central Railway',
+  ];
 
   complaintTypes = [
     'NMS',

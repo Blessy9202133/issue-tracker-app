@@ -24,6 +24,28 @@ export class DashboardComponent implements OnInit {
   shedFilter = '';
   assignedToMeFilter = false;
 
+  zones = [
+    'Central Railway',
+    'Konkan Railway',
+    'Metro Railway in Kolkata',
+    'Northern Railway',
+    'North Central Railway',
+    'North Eastern Railway',
+    'Northeast Frontier Railway',
+    'North Western Railway',
+    'Eastern Railway',
+    'East Central Railway',
+    'East Coast Railway',
+    'Southern Railway',
+    'South Central Railway',
+    'South Coast Railway',
+    'South Eastern Railway',
+    'South East Central Railway',
+    'South Western Railway',
+    'Western Railway',
+    'West Central Railway',
+  ];
+
   private issueService = inject(IssueService);
   authService = inject(AuthService);
 
