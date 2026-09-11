@@ -1,8 +1,9 @@
+const mongoose = require('mongoose');
 const Issue = require('../models/Issue');
 const User = require('../models/User');
 const { sendIssueAssignmentEmail } = require('../config/mailer');
 
-// @desc    Create a new customer complaint (Defaults to HBL Admin assignment)
+// @desc    Create a new customer complaint
 // @route   POST /api/issues
 // @access  Private
 const createIssue = async (req, res) => {
@@ -31,12 +32,11 @@ const createIssue = async (req, res) => {
     // Default to HBL Admin if assignedTo is not specified
     let targetAssigneeId = assignedTo;
     if (!targetAssigneeId) {
-      const adminUser = await User.findOne({ $or: [{ role: 'ADMIN' }, { email: 'admin@hbl.com' }] });
+      const adminUser = await User.findOne({ $or: [{ role: 'ADMIN' }, { email: 'admin@hbl.com' }] }).select('_id');
       if (adminUser) {
         targetAssigneeId = adminUser._id;
       } else {
-        // Fallback to first available user
-        const anyUser = await User.findOne();
+        const anyUser = await User.findOne().select('_id');
         targetAssigneeId = anyUser ? anyUser._id : req.user._id;
       }
     }
@@ -73,7 +73,7 @@ const createIssue = async (req, res) => {
       .populate('createdBy', 'name email department')
       .populate('assignedTo', 'name email department');
 
-    // Send email notification asynchronously
+    // Trigger non-blocking background email
     if (populatedIssue.assignedTo && populatedIssue.assignedTo.email) {
       sendIssueAssignmentEmail(populatedIssue, populatedIssue.assignedTo);
     }
@@ -85,7 +85,7 @@ const createIssue = async (req, res) => {
   }
 };
 
-// @desc    Get all complaints
+// @desc    Get all complaints (fast query)
 // @route   GET /api/issues
 // @access  Private
 const getIssues = async (req, res) => {
@@ -113,7 +113,8 @@ const getIssues = async (req, res) => {
       .populate('createdBy', 'name email department')
       .populate('assignedTo', 'name email department')
       .populate('comments.user', 'name email department')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json(issues);
   } catch (error) {
@@ -121,15 +122,25 @@ const getIssues = async (req, res) => {
   }
 };
 
-// @desc    Get single complaint by ID
+// @desc    Get single complaint by Mongo _id OR issueCode (fast query)
 // @route   GET /api/issues/:id
 // @access  Private
 const getIssueById = async (req, res) => {
   try {
-    const issue = await Issue.findById(req.params.id)
+    const paramId = req.params.id;
+    let query = {};
+
+    if (mongoose.Types.ObjectId.isValid(paramId)) {
+      query._id = paramId;
+    } else {
+      query.issueCode = paramId.toUpperCase();
+    }
+
+    const issue = await Issue.findOne(query)
       .populate('createdBy', 'name email department')
       .populate('assignedTo', 'name email department')
-      .populate('comments.user', 'name email role department');
+      .populate('comments.user', 'name email role department')
+      .lean();
 
     if (!issue) {
       return res.status(404).json({ message: 'Complaint not found' });
@@ -137,11 +148,12 @@ const getIssueById = async (req, res) => {
 
     res.json(issue);
   } catch (error) {
+    console.error('Error in getIssueById:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Respond to complaint & allocate/reassign to department
+// @desc    Respond to complaint & allocate/reassign
 // @route   PUT /api/issues/:id/respond
 // @access  Private
 const respondToIssue = async (req, res) => {
@@ -190,7 +202,6 @@ const respondToIssue = async (req, res) => {
       .populate('assignedTo', 'name email department')
       .populate('comments.user', 'name email role department');
 
-    // If reassigned, send email notification to new assignee
     if (reassigned && newAssigneeUser && newAssigneeUser.email) {
       sendIssueAssignmentEmail(updatedIssue, newAssigneeUser);
     }
