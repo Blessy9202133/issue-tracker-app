@@ -17,14 +17,13 @@ const userSchema = new mongoose.Schema(
     },
     username: {
       type: String,
-      required: [true, 'Please add a username'],
       unique: true,
+      sparse: true, // Allows null/missing values for existing database records
       lowercase: true,
       trim: true,
     },
     phoneNumber: {
       type: String,
-      required: [true, 'Please add a phone number'],
       trim: true,
     },
     password: {

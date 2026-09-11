@@ -1,17 +1,17 @@
 <div class="dashboard-container">
   <div class="dashboard-header">
     <div>
-      <h2>Issue Tracking Dashboard</h2>
-      <p>Overview of logged issues across zones and sheds</p>
+      <h2>Customer Complaint Dashboard</h2>
+      <p>Overview of logged customer complaints across zones and sheds</p>
     </div>
-    <a routerLink="/create-issue" class="btn-create">+ Report New Issue</a>
+    <a routerLink="/create-issue" class="btn-create">+ Log New Complaint</a>
   </div>
 
   <!-- Metric Cards -->
   <div class="metrics-grid">
     <div class="metric-card metric-total">
       <div class="metric-value">{{ totalCount }}</div>
-      <div class="metric-label">Total Issues</div>
+      <div class="metric-label">Total Complaints</div>
     </div>
     <div class="metric-card metric-open">
       <div class="metric-value">{{ openCount }}</div>
@@ -73,12 +73,12 @@
   <!-- Issue List Table -->
   <div class="table-card">
     @if (loading) {
-      <div class="loading-state">Loading issue database...</div>
+      <div class="loading-state">Loading complaints database...</div>
     } @else if (issues.length === 0) {
       <div class="empty-state">
         <span class="empty-icon">📂</span>
-        <h3>No issues found</h3>
-        <p>Try adjusting your search filters or create a new issue.</p>
+        <h3>No complaints found</h3>
+        <p>Try adjusting your search filters or log a new complaint.</p>
       </div>
     } @else {
       <table class="issue-table">
@@ -86,7 +86,7 @@
           <tr>
             <th>Code</th>
             <th>Zone / Shed</th>
-            <th>Details</th>
+            <th>Complaint Details</th>
             <th>Raised Date</th>
             <th>Photos</th>
             <th>Assignee</th>

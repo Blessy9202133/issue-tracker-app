@@ -7,20 +7,23 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user (name, email, username, phoneNumber, password, role)
+// @desc    Register a new user in Customer Complaint Portal
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
   try {
     const { name, email, username, phoneNumber, password, role } = req.body;
 
-    if (!name || !email || !username || !phoneNumber || !password) {
-      return res.status(400).json({ message: 'Name, email, username, phone number, and password are required' });
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required' });
     }
 
-    const userExists = await User.findOne({
-      $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }],
-    });
+    const searchConditions = [{ email: email.toLowerCase() }];
+    if (username) {
+      searchConditions.push({ username: username.toLowerCase() });
+    }
+
+    const userExists = await User.findOne({ $or: searchConditions });
 
     if (userExists) {
       return res.status(400).json({ message: 'User with this email or username already exists' });
@@ -29,8 +32,8 @@ const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      username,
-      phoneNumber,
+      username: username ? username.toLowerCase() : email.split('@')[0],
+      phoneNumber: phoneNumber || '',
       password,
       role: role || 'ASSIGNEE',
     });
@@ -53,7 +56,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user using username & password
+// @desc    Authenticate user using Username OR Email & Password
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
@@ -61,12 +64,18 @@ const loginUser = async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ message: 'Username and password are required' });
+      return res.status(400).json({ message: 'Username/Email and password are required' });
     }
 
-    // Allow login by username OR email
+    const searchStr = username.trim().toLowerCase();
+
+    // Match by email OR username OR name
     const user = await User.findOne({
-      $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }],
+      $or: [
+        { email: searchStr },
+        { username: searchStr },
+        { name: new RegExp(`^${searchStr}$`, 'i') },
+      ],
     });
 
     if (user && (await user.matchPassword(password))) {
@@ -74,13 +83,13 @@ const loginUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        username: user.username,
-        phoneNumber: user.phoneNumber,
+        username: user.username || user.email.split('@')[0],
+        phoneNumber: user.phoneNumber || '',
         role: user.role,
         token: generateToken(user._id),
       });
     } else {
-      res.status(401).json({ message: 'Invalid username or password' });
+      res.status(401).json({ message: 'Invalid username/email or password' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -28,45 +28,45 @@ app.use('/api/issues', issueRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Issue Tracker API is running smoothly' });
+  res.json({ status: 'OK', message: 'Customer Complaint Portal API is running smoothly' });
 });
 
-// Seed default users if empty (for instant testing)
+// Seed default users if empty
 const seedUsers = async () => {
   try {
     const userCount = await User.countDocuments();
     if (userCount === 0) {
-      console.log('Seeding initial demo users...');
+      console.log('Seeding initial portal users...');
       await User.create([
         {
-          name: 'Manager User',
-          email: 'manager@issuetracker.com',
-          username: 'manager',
+          name: 'Sushma',
+          email: 'abc@hbl.com',
+          username: 'sushma',
           phoneNumber: '9876543210',
           password: 'password123',
           role: 'REPORTER',
         },
         {
-          name: 'John Technician',
-          email: 'john.tech@issuetracker.com',
-          username: 'johntech',
+          name: 'jahnavi',
+          email: 'xyz@hbl.com',
+          username: 'jahnavi',
           phoneNumber: '9876543211',
           password: 'password123',
           role: 'ASSIGNEE',
         },
         {
-          name: 'Sarah Engineer',
-          email: 'sarah.eng@issuetracker.com',
-          username: 'saraheng',
+          name: 'prabhakar',
+          email: 'admin@hbl.com',
+          username: 'prabhakar',
           phoneNumber: '9876543212',
           password: 'password123',
           role: 'ASSIGNEE',
         },
       ]);
-      console.log('Demo users created successfully:');
-      console.log(' - Username: manager / password123 (REPORTER)');
-      console.log(' - Username: johntech / password123 (ASSIGNEE)');
-      console.log(' - Username: saraheng / password123 (ASSIGNEE)');
+      console.log('Portal users seeded:');
+      console.log(' - Sushma (abc@hbl.com / sushma)');
+      console.log(' - jahnavi (xyz@hbl.com / jahnavi)');
+      console.log(' - prabhakar (admin@hbl.com / prabhakar)');
     }
   } catch (err) {
     console.error('Error seeding users:', err.message);
@@ -78,5 +78,5 @@ seedUsers();
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`Customer Complaint Portal API running on port ${PORT}`);
 });

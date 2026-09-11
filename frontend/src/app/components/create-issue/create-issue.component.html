@@ -1,8 +1,8 @@
 <div class="page-container">
   <div class="form-card">
     <div class="form-header">
-      <h2>📌 Report New Issue</h2>
-      <p>Log issue details, attach photos, and assign a technician</p>
+      <h2>📌 Log New Customer Complaint</h2>
+      <p>Submit complaint details, attach photos, and assign a technician</p>
     </div>
 
     @if (errorMessage) {
@@ -33,7 +33,7 @@
             id="shed"
             name="shed"
             [(ngModel)]="shed"
-            placeholder="e.g. Shed 4B or Assembly Line 2"
+            placeholder="e.g. Shed 4B or Line 2"
             class="form-control"
             required
           />
@@ -42,7 +42,7 @@
 
       <!-- Issue Raised Date -->
       <div class="form-group">
-        <label for="issueRaisedDate">Issue Raised Date <span class="required">*</span></label>
+        <label for="issueRaisedDate">Complaint Raised Date <span class="required">*</span></label>
         <input
           type="date"
           id="issueRaisedDate"
@@ -55,7 +55,7 @@
 
       <!-- Assignee -->
       <div class="form-group">
-        <label for="assignedTo">Assign To (Person will receive an email) <span class="required">*</span></label>
+        <label for="assignedTo">Assign To (Person will receive an email notification) <span class="required">*</span></label>
         <select id="assignedTo" name="assignedTo" [(ngModel)]="assignedTo" class="form-control" required>
           @if (loadingUsers) {
             <option value="">Loading users...</option>
@@ -70,13 +70,13 @@
 
       <!-- Issue Details -->
       <div class="form-group">
-        <label for="details">Issue Description & Details <span class="required">*</span></label>
+        <label for="details">Complaint Description & Details <span class="required">*</span></label>
         <textarea
           id="details"
           name="details"
           rows="4"
           [(ngModel)]="details"
-          placeholder="Describe the issue, defect, or maintenance problem in detail..."
+          placeholder="Describe the complaint or defect in detail..."
           class="form-control"
           required
         ></textarea>
@@ -110,7 +110,7 @@
       <div class="form-actions">
         <button type="button" routerLink="/dashboard" class="btn-cancel">Cancel</button>
         <button type="submit" [disabled]="submitting" class="btn-submit">
-          {{ submitting ? 'Logging Issue & Dispatching Email...' : 'Submit & Send Email Notification' }}
+          {{ submitting ? 'Logging Complaint & Dispatching Email...' : 'Submit Complaint & Send Email Notification' }}
         </button>
       </div>
     </form>
