@@ -7,21 +7,30 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user
+// @desc    Register a new user (name, email, username, phoneNumber, password, role)
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, username, phoneNumber, password, role } = req.body;
 
-    const userExists = await User.findOne({ email });
+    if (!name || !email || !username || !phoneNumber || !password) {
+      return res.status(400).json({ message: 'Name, email, username, phone number, and password are required' });
+    }
+
+    const userExists = await User.findOne({
+      $or: [{ email: email.toLowerCase() }, { username: username.toLowerCase() }],
+    });
+
     if (userExists) {
-      return res.status(400).json({ message: 'User with this email already exists' });
+      return res.status(400).json({ message: 'User with this email or username already exists' });
     }
 
     const user = await User.create({
       name,
       email,
+      username,
+      phoneNumber,
       password,
       role: role || 'ASSIGNEE',
     });
@@ -31,6 +40,8 @@ const registerUser = async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
         role: user.role,
         token: generateToken(user._id),
       });
@@ -42,25 +53,34 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Authenticate user & get token
+// @desc    Authenticate user using username & password
 // @route   POST /api/auth/login
 // @access  Public
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    const user = await User.findOne({ email });
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Username and password are required' });
+    }
+
+    // Allow login by username OR email
+    const user = await User.findOne({
+      $or: [{ username: username.toLowerCase() }, { email: username.toLowerCase() }],
+    });
 
     if (user && (await user.matchPassword(password))) {
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
         role: user.role,
         token: generateToken(user._id),
       });
     } else {
-      res.status(401).json({ message: 'Invalid email or password' });
+      res.status(401).json({ message: 'Invalid username or password' });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });

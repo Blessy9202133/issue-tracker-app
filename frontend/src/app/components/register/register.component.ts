@@ -14,6 +14,8 @@ import { AuthService } from '../../services/auth.service';
 export class RegisterComponent {
   name = '';
   email = '';
+  username = '';
+  phoneNumber = '';
   password = '';
   role = 'ASSIGNEE';
   errorMessage = '';
@@ -23,8 +25,8 @@ export class RegisterComponent {
   private router = inject(Router);
 
   onSubmit(): void {
-    if (!this.name || !this.email || !this.password) {
-      this.errorMessage = 'Please fill in all required fields';
+    if (!this.name || !this.email || !this.username || !this.phoneNumber || !this.password) {
+      this.errorMessage = 'Please fill in all required fields (Name, Email, Username, Phone Number, and Password).';
       return;
     }
 
@@ -35,6 +37,8 @@ export class RegisterComponent {
       .register({
         name: this.name,
         email: this.email,
+        username: this.username,
+        phoneNumber: this.phoneNumber,
         password: this.password,
         role: this.role,
       })

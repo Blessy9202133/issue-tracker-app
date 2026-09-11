@@ -2,7 +2,7 @@
   <div class="auth-card">
     <div class="auth-header">
       <h2>Welcome Back</h2>
-      <p>Log in to access your Issue Tracker Dashboard</p>
+      <p>Log in with your Username & Password</p>
     </div>
 
     @if (errorMessage) {
@@ -13,13 +13,13 @@
 
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
       <div class="form-group">
-        <label for="email">Email Address</label>
+        <label for="username">Username</label>
         <input
-          type="email"
-          id="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="e.g. manager@issuetracker.com"
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="username"
+          placeholder="e.g. manager"
           required
           class="form-control"
         />
@@ -46,11 +46,11 @@
     <div class="demo-accounts">
       <p class="demo-title">Quick Demo Login:</p>
       <div class="demo-buttons">
-        <button (click)="fillDemo('manager@issuetracker.com')" class="btn-demo">
-          Reporter (Manager)
+        <button (click)="fillDemo('manager')" class="btn-demo">
+          Reporter (manager)
         </button>
-        <button (click)="fillDemo('john.tech@issuetracker.com')" class="btn-demo">
-          Assignee (John Tech)
+        <button (click)="fillDemo('johntech')" class="btn-demo">
+          Assignee (johntech)
         </button>
       </div>
     </div>

@@ -12,7 +12,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
-  email = '';
+  username = '';
   password = '';
   errorMessage = '';
   loading = false;
@@ -21,15 +21,15 @@ export class LoginComponent {
   private router = inject(Router);
 
   onSubmit(): void {
-    if (!this.email || !this.password) {
-      this.errorMessage = 'Please provide email and password';
+    if (!this.username || !this.password) {
+      this.errorMessage = 'Please enter your username and password';
       return;
     }
 
     this.loading = true;
     this.errorMessage = '';
 
-    this.authService.login({ email: this.email, password: this.password }).subscribe({
+    this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/dashboard']);
@@ -41,8 +41,8 @@ export class LoginComponent {
     });
   }
 
-  fillDemo(email: string): void {
-    this.email = email;
+  fillDemo(username: string): void {
+    this.username = username;
     this.password = 'password123';
   }
 }

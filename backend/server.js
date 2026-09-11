@@ -41,26 +41,32 @@ const seedUsers = async () => {
         {
           name: 'Manager User',
           email: 'manager@issuetracker.com',
+          username: 'manager',
+          phoneNumber: '9876543210',
           password: 'password123',
           role: 'REPORTER',
         },
         {
           name: 'John Technician',
           email: 'john.tech@issuetracker.com',
+          username: 'johntech',
+          phoneNumber: '9876543211',
           password: 'password123',
           role: 'ASSIGNEE',
         },
         {
           name: 'Sarah Engineer',
           email: 'sarah.eng@issuetracker.com',
+          username: 'saraheng',
+          phoneNumber: '9876543212',
           password: 'password123',
           role: 'ASSIGNEE',
         },
       ]);
       console.log('Demo users created successfully:');
-      console.log(' - manager@issuetracker.com / password123 (REPORTER)');
-      console.log(' - john.tech@issuetracker.com / password123 (ASSIGNEE)');
-      console.log(' - sarah.eng@issuetracker.com / password123 (ASSIGNEE)');
+      console.log(' - Username: manager / password123 (REPORTER)');
+      console.log(' - Username: johntech / password123 (ASSIGNEE)');
+      console.log(' - Username: saraheng / password123 (ASSIGNEE)');
     }
   } catch (err) {
     console.error('Error seeding users:', err.message);

@@ -9,12 +9,11 @@ import { AuthResponse, User } from '../models/user.model';
 export class AuthService {
   private apiUrl = 'http://localhost:5000/api/auth';
   
-  // Signal to store current logged in user state
   currentUser = signal<User | null>(this.getStoredUser());
 
   constructor(private http: HttpClient) {}
 
-  login(credentials: { email: string; password: string }): Observable<AuthResponse> {
+  login(credentials: { username: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((res) => {
         localStorage.setItem('token', res.token);
@@ -24,7 +23,14 @@ export class AuthService {
     );
   }
 
-  register(userData: { name: string; email: string; password: string; role?: string }): Observable<AuthResponse> {
+  register(userData: {
+    name: string;
+    email: string;
+    username: string;
+    phoneNumber: string;
+    password: string;
+    role?: string;
+  }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, userData).pipe(
       tap((res) => {
         localStorage.setItem('token', res.token);
