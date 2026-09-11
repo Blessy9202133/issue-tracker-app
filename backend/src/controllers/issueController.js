@@ -29,10 +29,18 @@ const createIssue = async (req, res) => {
       return res.status(400).json({ message: 'Zone and Complaint description are required' });
     }
 
-    // Default to HBL Admin if assignedTo is not specified
+    // Default to HBL Admin / Emp if assignedTo is not specified
     let targetAssigneeId = assignedTo;
     if (!targetAssigneeId) {
-      const adminUser = await User.findOne({ $or: [{ role: 'ADMIN' }, { email: 'admin@hbl.com' }] }).select('_id');
+      const adminUser = await User.findOne({
+        $or: [
+          { role: 'admin' },
+          { role: 'ADMIN' },
+          { role: 'hbl_emp' },
+          { email: 'admin@hbl.com' },
+        ],
+      }).select('_id');
+
       if (adminUser) {
         targetAssigneeId = adminUser._id;
       } else {
@@ -70,10 +78,9 @@ const createIssue = async (req, res) => {
     const issue = await Issue.create(issueData);
 
     const populatedIssue = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email department')
-      .populate('assignedTo', 'name email department');
+      .populate('createdBy', 'name email department role')
+      .populate('assignedTo', 'name email department role');
 
-    // Trigger non-blocking background email
     if (populatedIssue.assignedTo && populatedIssue.assignedTo.email) {
       sendIssueAssignmentEmail(populatedIssue, populatedIssue.assignedTo);
     }
@@ -85,7 +92,7 @@ const createIssue = async (req, res) => {
   }
 };
 
-// @desc    Get all complaints (fast query)
+// @desc    Get all complaints
 // @route   GET /api/issues
 // @access  Private
 const getIssues = async (req, res) => {
@@ -110,9 +117,9 @@ const getIssues = async (req, res) => {
     }
 
     const issues = await Issue.find(query)
-      .populate('createdBy', 'name email department')
-      .populate('assignedTo', 'name email department')
-      .populate('comments.user', 'name email department')
+      .populate('createdBy', 'name email department role')
+      .populate('assignedTo', 'name email department role')
+      .populate('comments.user', 'name email department role')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -122,7 +129,7 @@ const getIssues = async (req, res) => {
   }
 };
 
-// @desc    Get single complaint by Mongo _id OR issueCode (fast query)
+// @desc    Get single complaint by Mongo _id OR issueCode
 // @route   GET /api/issues/:id
 // @access  Private
 const getIssueById = async (req, res) => {
@@ -137,8 +144,8 @@ const getIssueById = async (req, res) => {
     }
 
     const issue = await Issue.findOne(query)
-      .populate('createdBy', 'name email department')
-      .populate('assignedTo', 'name email department')
+      .populate('createdBy', 'name email department role')
+      .populate('assignedTo', 'name email department role')
       .populate('comments.user', 'name email role department')
       .lean();
 
@@ -185,8 +192,8 @@ const respondToIssue = async (req, res) => {
 
     if (comment || reassigned) {
       const commentText = comment
-        ? (reassigned ? `[Re-assigned to ${newAssigneeUser?.name} (${newAssigneeUser?.department})] - ${comment}` : comment)
-        : `Re-assigned complaint to ${newAssigneeUser?.name} (${newAssigneeUser?.department})`;
+        ? (reassigned ? `[Re-assigned to ${newAssigneeUser?.name} (${newAssigneeUser?.role})] - ${comment}` : comment)
+        : `Re-assigned complaint to ${newAssigneeUser?.name} (${newAssigneeUser?.role})`;
 
       issue.comments.push({
         user: req.user._id,
@@ -198,8 +205,8 @@ const respondToIssue = async (req, res) => {
     await issue.save();
 
     const updatedIssue = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email department')
-      .populate('assignedTo', 'name email department')
+      .populate('createdBy', 'name email department role')
+      .populate('assignedTo', 'name email department role')
       .populate('comments.user', 'name email role department');
 
     if (reassigned && newAssigneeUser && newAssigneeUser.email) {

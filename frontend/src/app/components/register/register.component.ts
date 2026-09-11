@@ -17,7 +17,7 @@ export class RegisterComponent {
   username = '';
   phoneNumber = '';
   password = '';
-  role = 'ASSIGNEE';
+  role = 'Customer';
   errorMessage = '';
   loading = false;
 

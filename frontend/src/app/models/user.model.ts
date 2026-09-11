@@ -5,7 +5,7 @@ export interface User {
   username: string;
   phoneNumber: string;
   department?: string;
-  role: 'REPORTER' | 'ASSIGNEE' | 'ADMIN';
+  role: 'Customer' | 'hbl_emp' | 'admin' | string;
   token?: string;
 }
 
@@ -16,6 +16,6 @@ export interface AuthResponse {
   username: string;
   phoneNumber: string;
   department?: string;
-  role: 'REPORTER' | 'ASSIGNEE' | 'ADMIN';
+  role: 'Customer' | 'hbl_emp' | 'admin' | string;
   token: string;
 }

@@ -39,47 +39,37 @@ const seedUsers = async () => {
       console.log('Seeding initial HBL Portal users...');
       await User.create([
         {
-          name: 'HBL Admin',
-          email: 'admin@hbl.com',
-          username: 'hbladmin',
-          phoneNumber: '9876543200',
-          department: 'HBL Admin',
-          password: 'password123',
-          role: 'ADMIN',
-        },
-        {
           name: 'Sushma',
-          email: 'abc@hbl.com',
+          email: 'sushma.onapakala@hbl.com',
           username: 'sushma',
           phoneNumber: '9876543210',
           department: 'Customer Desk',
           password: 'password123',
-          role: 'REPORTER',
+          role: 'Customer',
         },
         {
           name: 'jahnavi',
-          email: 'xyz@hbl.com',
+          email: 'sushmaonapakala@hbl.com',
           username: 'jahnavi',
           phoneNumber: '9876543211',
-          department: 'Software Department',
+          department: 'HBL Software Dept',
           password: 'password123',
-          role: 'ASSIGNEE',
+          role: 'hbl_emp',
         },
         {
           name: 'prabhakar',
-          email: 'prabhakar@hbl.com',
+          email: 'admin@hbl.com',
           username: 'prabhakar',
           phoneNumber: '9876543212',
-          department: 'Hardware Department',
+          department: 'HBL Management',
           password: 'password123',
-          role: 'ASSIGNEE',
+          role: 'admin',
         },
       ]);
       console.log('HBL Portal users seeded:');
-      console.log(' - HBL Admin (admin@hbl.com / hbladmin) - ADMIN');
-      console.log(' - Sushma (abc@hbl.com / sushma) - REPORTER');
-      console.log(' - jahnavi (xyz@hbl.com / jahnavi) - ASSIGNEE (Software)');
-      console.log(' - prabhakar (prabhakar@hbl.com / prabhakar) - ASSIGNEE (Hardware)');
+      console.log(' - Sushma (Customer)');
+      console.log(' - jahnavi (hbl_emp)');
+      console.log(' - prabhakar (admin)');
     }
   } catch (err) {
     console.error('Error seeding users:', err.message);

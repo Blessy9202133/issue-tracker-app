@@ -2,7 +2,7 @@
   <div class="auth-card">
     <div class="auth-header">
       <h2>Create Account</h2>
-      <p>Fill in details to register as a Reporter or Assignee</p>
+      <p>Fill in details to register on Customer Complaint Portal</p>
     </div>
 
     @if (errorMessage) {
@@ -81,9 +81,9 @@
       <div class="form-group">
         <label for="role">User Role</label>
         <select id="role" name="role" [(ngModel)]="role" class="form-control">
-          <option value="REPORTER">Reporter (Log & raise issues)</option>
-          <option value="ASSIGNEE">Assignee (Respond & resolve issues)</option>
-          <option value="ADMIN">Admin</option>
+          <option value="Customer">Customer (Log & raise complaints)</option>
+          <option value="hbl_emp">hbl_emp (HBL Employee / Engineer)</option>
+          <option value="admin">admin (HBL Admin)</option>
         </select>
       </div>
 

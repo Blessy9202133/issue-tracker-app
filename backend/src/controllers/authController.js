@@ -7,7 +7,7 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register a new user in Customer Complaint Portal
+// @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
@@ -35,7 +35,7 @@ const registerUser = async (req, res) => {
       username: username ? username.toLowerCase() : email.split('@')[0],
       phoneNumber: phoneNumber || '',
       password,
-      role: role || 'ASSIGNEE',
+      role: role || 'Customer',
     });
 
     if (user) {
@@ -85,7 +85,8 @@ const loginUser = async (req, res) => {
         email: user.email,
         username: user.username || user.email.split('@')[0],
         phoneNumber: user.phoneNumber || '',
-        role: user.role,
+        department: user.department || '',
+        role: user.role || 'Customer',
         token: generateToken(user._id),
       });
     } else {
