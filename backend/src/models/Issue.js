@@ -91,7 +91,23 @@ const issueSchema = new mongoose.Schema(
     expectedCompletionDate: {
       type: Date,
     },
+    closedDate: {
+      type: Date,
+    },
+    analysis: {
+      type: String,
+      trim: true,
+    },
+    actionTaken: {
+      type: String,
+      trim: true,
+    },
     photos: [
+      {
+        type: String,
+      },
+    ],
+    analysisPhotos: [
       {
         type: String,
       },
@@ -124,11 +140,21 @@ issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ zone: 1 });
 issueSchema.index({ complaintCategory: 1 });
 
-// Auto generate issueCode before saving
+// Auto generate issueCode before saving in YYMMDD### format based on registration date
 issueSchema.pre('save', async function (next) {
   if (!this.issueCode) {
-    const count = await mongoose.model('Issue').countDocuments();
-    this.issueCode = `CMP-${1000 + count + 1}`;
+    const now = this.issueRaisedDate ? new Date(this.issueRaisedDate) : new Date();
+    const year = String(now.getFullYear()).slice(-2);
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateKey = `${year}${month}${day}`;
+
+    const count = await mongoose.model('Issue').countDocuments({
+      issueCode: { $regex: `^${dateKey}` },
+    });
+
+    const sequence = String(count + 1).padStart(3, '0');
+    this.issueCode = `${dateKey}${sequence}`;
   }
   next();
 });

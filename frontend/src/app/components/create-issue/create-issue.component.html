@@ -1,50 +1,29 @@
 <div class="page-container">
-  <div class="form-card">
-    <div class="form-header">
-      <h2>📌 Log New Customer Complaint</h2>
-      <p>Select a complaint template (Wayside or Onboard) and fill in the details</p>
+  @if (loadingComplaint()) {
+    <div class="loading-card">
+      <p>Loading complaint details for editing...</p>
     </div>
+  } @else {
+    <div class="form-card">
+      <div class="form-header">
+        @if (isEditMode()) {
+          <h2>Edit Customer Complaint {{ issueCode() ? '#' + issueCode() : '' }}</h2>
+          <p>Correct or update the details entered for this customer complaint</p>
+        } @else {
+          <h2>Register Customer Complaint</h2>
+          <p>Enter the complaint details reported by the customer</p>
+        }
+      </div>
 
-    <!-- Template Selector Tabs -->
-    <div class="template-selector">
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="complaintCategory === 'WAYSIDE'"
-        (click)="setCategory('WAYSIDE')"
-      >
-        🛤️ Wayside Complaint
-      </button>
-      <button
-        type="button"
-        class="tab-btn"
-        [class.active]="complaintCategory === 'ONBOARD'"
-        (click)="setCategory('ONBOARD')"
-      >
-        🚆 Onboard Complaint
-      </button>
-    </div>
+      @if (errorMessage()) {
+        <div class="alert alert-error">{{ errorMessage() }}</div>
+      }
 
-    <div class="routing-notice">
-      ℹ️ <strong>Default Routing:</strong> All new complaints are automatically routed to <strong>HBL Admin</strong>. HBL Admin will review the complaint and allocate it to the respective department/person.
-    </div>
+      @if (successMessage()) {
+        <div class="alert alert-success">{{ successMessage() }}</div>
+      }
 
-    @if (errorMessage) {
-      <div class="alert alert-error">{{ errorMessage }}</div>
-    }
-
-    @if (successMessage) {
-      <div class="alert alert-success">{{ successMessage }}</div>
-    }
-
-    <form (ngSubmit)="onSubmit()" #issueForm="ngForm">
-      
-      <!-- ==================== WAYSIDE COMPLAINT TEMPLATE ==================== -->
-      @if (complaintCategory === 'WAYSIDE') {
-        <div class="template-banner wayside-banner">
-          <span>🛤️ Wayside Complaint Form</span>
-        </div>
-
+      <form (ngSubmit)="onSubmit()" #issueForm="ngForm">
         <div class="form-grid">
           <!-- Zone -->
           <div class="form-group">
@@ -56,22 +35,23 @@
             </select>
           </div>
 
-          <!-- Contract -->
+          <!-- Division -->
           <div class="form-group">
-            <label for="contract">Contract</label>
+            <label for="contract">Division <span class="required">*</span></label>
             <input
               type="text"
               id="contract"
               name="contract"
               [(ngModel)]="contract"
-              placeholder="Contract Number"
+              placeholder="Division"
               class="form-control"
+              required
             />
           </div>
 
           <!-- Station -->
           <div class="form-group">
-            <label for="station">Station <span class="required">*</span></label>
+            <label for="station">Station</label>
             <input
               type="text"
               id="station"
@@ -79,207 +59,153 @@
               [(ngModel)]="station"
               placeholder="Station Name"
               class="form-control"
-              required
-            />
-          </div>
-
-          <!-- Type of Complaint (Dropdown) -->
-          <div class="form-group">
-            <label for="complaintType">Type of Complaint <span class="required">*</span></label>
-            <select id="complaintType" name="complaintType" [(ngModel)]="complaintType" class="form-control" required>
-              @for (type of complaintTypes; track type) {
-                <option [value]="type">{{ type }}</option>
-              }
-            </select>
-          </div>
-        </div>
-      }
-
-      <!-- ==================== ONBOARD COMPLAINT TEMPLATE ==================== -->
-      @else {
-        <div class="template-banner onboard-banner">
-          <span>🚆 Onboard Complaint Form</span>
-        </div>
-
-        <div class="form-grid">
-          <!-- Zone -->
-          <div class="form-group">
-            <label for="zone">Zone <span class="required">*</span></label>
-            <select id="zone" name="zone" [(ngModel)]="zone" class="form-control" required>
-              @for (z of zones; track z) {
-                <option [value]="z">{{ z }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Contract -->
-          <div class="form-group">
-            <label for="contract">Contract</label>
-            <input
-              type="text"
-              id="contract"
-              name="contract"
-              [(ngModel)]="contract"
-              placeholder="Contract Number"
-              class="form-control"
-            />
-          </div>
-
-          <!-- Shed Name -->
-          <div class="form-group">
-            <label for="shed">Shed Name <span class="required">*</span></label>
-            <input
-              type="text"
-              id="shed"
-              name="shed"
-              [(ngModel)]="shed"
-              placeholder="Shed Name"
-              class="form-control"
-              required
             />
           </div>
 
           <!-- Loco Number -->
           <div class="form-group">
-            <label for="locoNumber">Loco Number <span class="required">*</span></label>
+            <label for="locoNumber">Loco Number</label>
             <input
               type="text"
               id="locoNumber"
               name="locoNumber"
               [(ngModel)]="locoNumber"
-              placeholder="Loco Number"
+              placeholder="Loco Number (optional)"
               class="form-control"
-              required
-            />
-          </div>
-
-          <!-- Loco Type Dropdown -->
-          <div class="form-group">
-            <label for="locoType">Loco Type</label>
-            <select id="locoType" name="locoType" [(ngModel)]="locoType" class="form-control">
-              <option value="" disabled>Select Loco Type</option>
-              @for (lt of locoTypes; track lt) {
-                <option [value]="lt">{{ lt }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Brake Type Dropdown -->
-          <div class="form-group">
-            <label for="brakeType">Brake Type</label>
-            <select id="brakeType" name="brakeType" [(ngModel)]="brakeType" class="form-control">
-              <option value="" disabled>Select Brake Type</option>
-              @for (bt of brakeTypes; track bt) {
-                <option [value]="bt">{{ bt }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Failure Type -->
-          <div class="form-group">
-            <label for="failureType">Failure Type</label>
-            <input
-              type="text"
-              id="failureType"
-              name="failureType"
-              [(ngModel)]="failureType"
-              placeholder="Failure Type"
-              class="form-control"
-            />
-          </div>
-
-          <!-- PO / LOA Number -->
-          <div class="form-group">
-            <label for="poLoaNumber">PO / LOA Number</label>
-            <input
-              type="text"
-              id="poLoaNumber"
-              name="poLoaNumber"
-              [(ngModel)]="poLoaNumber"
-              placeholder="PO / LOA Number"
-              class="form-control"
+              inputmode="numeric"
+              pattern="[0-9]*"
+              (input)="locoNumber = locoNumber.replace(/[^0-9]/g, '')"
             />
           </div>
         </div>
-      }
 
-      <!-- ==================== COMMON FIELDS ==================== -->
-      <div class="common-section">
-        <!-- Raised Date & Initial Assignee -->
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="issueRaisedDate">Complaint Raised Date <span class="required">*</span></label>
-            <input
-              type="date"
-              id="issueRaisedDate"
-              name="issueRaisedDate"
-              [(ngModel)]="issueRaisedDate"
-              class="form-control"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="assignedTo">Assigned To (Default: HBL Admin) <span class="required">*</span></label>
-            <select id="assignedTo" name="assignedTo" [(ngModel)]="assignedTo" class="form-control" required>
-              @if (loadingUsers) {
-                <option value="">Loading users...</option>
-              }
-              @for (user of users; track user._id) {
-                <option [value]="user._id">
-                  {{ user.name }} ({{ user.email }}) — {{ user.department || user.role }}
-                </option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <!-- Complaint Description -->
-        <div class="form-group">
-          <label for="details">Complaint Description <span class="required">*</span></label>
-          <textarea
-            id="details"
-            name="details"
-            rows="4"
-            [(ngModel)]="details"
-            placeholder="Describe the complaint, defect, or failure details..."
-            class="form-control"
-            required
-          ></textarea>
-        </div>
-
-        <!-- File / Photo Upload -->
-        <div class="form-group">
-          <label for="photos">File / Photo Upload</label>
-          <input
-            type="file"
-            id="photos"
-            name="photos"
-            (change)="onFileChange($event)"
-            multiple
-            accept="image/*"
-            class="file-input"
-          />
-          <p class="file-help">You can upload multiple files/photos (JPEG, PNG, WEBP).</p>
-
-          @if (previewUrls.length > 0) {
-            <div class="image-previews">
-              @for (url of previewUrls; track $index) {
-                <div class="preview-item">
-                  <img [src]="url" alt="Preview photo" />
-                </div>
-              }
+        <!-- ==================== COMMON FIELDS ==================== -->
+        <div class="common-section">
+          <!-- Raised Date & Initial Assignee -->
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="issueRaisedDate">Complaint Raised Date & Time <span class="required">*</span></label>
+              <input
+                type="datetime-local"
+                id="issueRaisedDate"
+                name="issueRaisedDate"
+                [(ngModel)]="issueRaisedDate"
+                class="form-control"
+                required
+              />
             </div>
+          </div>
+
+          <!-- Complaint Description -->
+          <div class="form-group">
+            <div class="field-header-row">
+              <label for="details">Complaint Description <span class="required">*</span></label>
+              <span
+                class="word-counter"
+                [class.counter-warn]="getWordCount(details) > 900 && getWordCount(details) <= 1000"
+                [class.counter-error]="getWordCount(details) > 1000"
+              >
+                {{ getWordCount(details) }} / 1000 words
+              </span>
+            </div>
+            <textarea
+              id="details"
+              name="details"
+              rows="6"
+              [(ngModel)]="details"
+              placeholder="Describe the complaint, defect, or failure details (up to 1,000 words)..."
+              class="form-control"
+              required
+            ></textarea>
+            @if (getWordCount(details) > 1000) {
+              <p class="field-error-text">⚠️ Word limit exceeded: Maximum allowed is 1,000 words.</p>
+            }
+          </div>
+
+          <!-- File / Photo Upload -->
+          <div class="form-group">
+            @if (isEditMode() && existingPhotos().length > 0) {
+              <div class="existing-photos-section">
+                <label class="section-sub-label">Current Attached Files / Photos ({{ existingPhotos().length }}):</label>
+                <div class="image-previews">
+                  @for (photo of existingPhotos(); track photo; let idx = $index) {
+                    <div class="preview-item">
+                      @if (isImage(photo)) {
+                        <img [src]="getImageUrl(photo)" [alt]="getFileName(photo)" />
+                      } @else {
+                        <div class="file-card">
+                          <span class="file-card-icon">📄</span>
+                        </div>
+                      }
+                      <span class="preview-filename">{{ getFileName(photo) }}</span>
+                      <button
+                        type="button"
+                        (click)="removeExistingPhoto(idx)"
+                        class="preview-remove-btn"
+                        title="Remove attachment"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <label for="photos">
+              {{ isEditMode() ? 'Add More Files / Photos' : 'File / Photo Upload' }}
+            </label>
+            <input
+              type="file"
+              id="photos"
+              name="photos"
+              (change)="onFileChange($event)"
+              multiple
+              class="file-input"
+            />
+            <p class="file-help">Accepts all file types (PDF, Word, Excel, text, etc.) and photos (JPG, PNG, WEBP).</p>
+
+            @if (filePreviews.length > 0) {
+              <div class="image-previews">
+                @for (file of filePreviews; track $index) {
+                  <div class="preview-item">
+                    @if (file.isImage && file.previewUrl) {
+                      <img [src]="file.previewUrl" [alt]="file.name" />
+                    } @else {
+                      <div class="file-card">
+                        <span class="file-card-icon">📄</span>
+                      </div>
+                    }
+                    <span class="preview-filename">{{ file.name }}</span>
+                    <button
+                      type="button"
+                      (click)="removeSelectedFile($index)"
+                      class="preview-remove-btn"
+                      title="Remove file"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-actions">
+          @if (isEditMode()) {
+            <button type="button" [routerLink]="['/issues', editId()]" class="btn-cancel">Cancel</button>
+            <button type="submit" [disabled]="submitting()" class="btn-submit">
+              {{ submitting() ? 'Saving Changes...' : 'Save & Move to View / Respond' }}
+            </button>
+          } @else {
+            <button type="button" routerLink="/dashboard" class="btn-cancel">Cancel</button>
+            <button type="submit" [disabled]="submitting()" class="btn-submit">
+              {{ submitting() ? 'Logging Complaint...' : 'Submit' }}
+            </button>
           }
         </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" routerLink="/dashboard" class="btn-cancel">Cancel</button>
-        <button type="submit" [disabled]="submitting" class="btn-submit">
-          {{ submitting ? 'Logging Complaint...' : 'Submit Complaint to HBL Admin' }}
-        </button>
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
+  }
 </div>

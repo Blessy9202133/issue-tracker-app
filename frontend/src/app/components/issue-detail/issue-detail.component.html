@@ -9,193 +9,324 @@
     </div>
   } @else if (issue()) {
     @let i = issue()!;
-    <div class="detail-header-card">
+
+    <div class="top-nav-bar">
+      <a routerLink="/dashboard" class="btn-back">← Back to Complaints Dashboard</a>
+    </div>
+
+    @if (successMessage()) {
+      <div class="alert alert-success">{{ successMessage() }}</div>
+    }
+    @if (errorMessage()) {
+      <div class="alert alert-error">{{ errorMessage() }}</div>
+    }
+
+    <!-- Box 1: Compact View Section (Customer Entered Details) -->
+    <div class="box-card view-box">
+      <!-- Top Row: Issue Code & Status Action -->
       <div class="header-top">
-        <div class="code-and-cat">
-          <span class="issue-code">{{ i.issueCode }}</span>
-          <span class="category-badge" [class.badge-wayside]="i.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="i.complaintCategory === 'ONBOARD'">
-            {{ i.complaintCategory === 'WAYSIDE' ? 'Wayside Complaint' : 'Onboard Complaint' }}
+        <span class="issue-code">{{ i.issueCode }}</span>
+
+        <div class="status-action-wrap">
+          <span class="status-badge" [ngClass]="getStatusClass(i.status)">
+            {{ i.status }}
           </span>
         </div>
-        <span class="status-badge" [ngClass]="getStatusClass(i.status)">
-          {{ i.status }}
-        </span>
       </div>
 
-      <h1 class="issue-title">Zone: {{ i.zone }}</h1>
+      <!-- Zone Heading -->
+      <h2 class="zone-title">Zone: {{ i.zone }}</h2>
 
-      <!-- Template Specific Metadata Grid -->
-      <div class="meta-grid">
+      <!-- Compact Metadata Row -->
+      <div class="meta-row">
         <div class="meta-item">
-          <span class="meta-label">Contract:</span>
+          <span class="meta-label">Division:</span>
           <span class="meta-val">{{ i.contract || 'N/A' }}</span>
         </div>
 
-        @if (i.complaintCategory === 'WAYSIDE') {
-          <div class="meta-item">
-            <span class="meta-label">Station:</span>
-            <span class="meta-val">{{ i.station || 'N/A' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Type of Complaint:</span>
-            <span class="meta-val highlight">{{ i.complaintType || 'N/A' }}</span>
-          </div>
-        } @else {
-          <div class="meta-item">
-            <span class="meta-label">Shed Name:</span>
-            <span class="meta-val">{{ i.shed || 'N/A' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Loco Number:</span>
-            <span class="meta-val highlight">{{ i.locoNumber || 'N/A' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Loco / Brake Type:</span>
-            <span class="meta-val">{{ i.locoType || 'N/A' }} / {{ i.brakeType || 'N/A' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Failure Type:</span>
-            <span class="meta-val">{{ i.failureType || 'N/A' }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">PO / LOA Number:</span>
-            <span class="meta-val">{{ i.poLoaNumber || 'N/A' }}</span>
-          </div>
-        }
+        <div class="meta-item">
+          <span class="meta-label">Station:</span>
+          <span class="meta-val">{{ i.station || 'N/A' }}</span>
+        </div>
 
         <div class="meta-item">
-          <span class="meta-label">Raised Date:</span>
-          <span class="meta-val">{{ i.issueRaisedDate | date: 'mediumDate' }}</span>
+          <span class="meta-label">Loco ID:</span>
+          <span class="meta-val highlight">{{ i.locoNumber || 'N/A' }}</span>
         </div>
+
         <div class="meta-item">
-          <span class="meta-label">Reported By:</span>
-          <span class="meta-val">{{ i.createdBy?.name || 'N/A' }} ({{ i.createdBy?.email || 'N/A' }})</span>
+          <span class="meta-label">Raised Date & Time:</span>
+          <span class="meta-val">{{ i.issueRaisedDate | date: 'medium' }}</span>
         </div>
-        <div class="meta-item">
-          <span class="meta-label">Currently Assigned To:</span>
-          <span class="meta-val highlight">{{ i.assignedTo?.name || 'Unassigned' }} ({{ i.assignedTo?.department || i.assignedTo?.role || 'Department' }})</span>
+
+        @if (i.closedDate || (i.status === 'CLOSED' && i.updatedAt)) {
+          <div class="meta-item">
+            <span class="meta-label">Closed Date & Time:</span>
+            <span class="meta-val closed-val">{{ (i.closedDate || i.updatedAt) | date: 'medium' }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Compact Description & Attached Files Row -->
+      <div class="view-details-row">
+        <div class="view-desc-col">
+          <span class="field-label">Complaint Description:</span>
+          <div class="desc-content">{{ i.details }}</div>
         </div>
+
+        @if (i.photos && i.photos.length > 0) {
+          <div class="view-files-col">
+            <span class="field-label">Attached Photos / Files ({{ i.photos.length }}):</span>
+            <div class="compact-files-list">
+              @for (photo of i.photos; track photo) {
+                @if (isImage(photo)) {
+                  <a [href]="getImageUrl(photo)" target="_blank" class="compact-thumb-item" [title]="getFileName(photo)">
+                    <img [src]="getImageUrl(photo)" [alt]="getFileName(photo)" />
+                    <span class="thumb-name">{{ getFileName(photo) }}</span>
+                  </a>
+                } @else {
+                  <a [href]="getImageUrl(photo)" target="_blank" class="compact-file-item" [title]="getFileName(photo)">
+                    <span class="file-icon">📄</span>
+                    <span class="file-name">{{ getFileName(photo) }}</span>
+                  </a>
+                }
+              }
+            </div>
+          </div>
+        }
       </div>
     </div>
 
-    <div class="main-grid">
-      <!-- Left Column: Details & Photos -->
-      <div class="left-col">
-        <!-- Details Card -->
-        <div class="card">
-          <h3>📋 Complaint Description</h3>
-          <p class="details-text">{{ i.details }}</p>
+    <!-- Box 2: Analysis Section (Team Findings & Action Plan) -->
+    <div class="box-card analysis-box">
+      <div class="card-header-row">
+        <div class="card-title-group">
+          <h3 class="card-title">🔬 Technical Analysis & Action Taken</h3>
+          <span class="card-subtitle">Investigation findings, root cause analysis, and corrective measures</span>
         </div>
 
-        <!-- Photos Gallery -->
-        <div class="card">
-          <h3>📷 Attached Photos / Files ({{ i.photos?.length || 0 }})</h3>
-          @if (i.photos && i.photos.length > 0) {
-            <div class="gallery">
-              @for (photo of i.photos; track photo) {
-                <a [href]="getImageUrl(photo)" target="_blank" class="gallery-item">
-                  <img [src]="getImageUrl(photo)" alt="Complaint photo" />
-                </a>
+        @if (!isEditingAnalysis && (i.analysis || i.actionTaken)) {
+          <button type="button" (click)="onEditAnalysis()" class="btn-edit-analysis">
+            ✏️ Edit Analysis
+          </button>
+        }
+      </div>
+
+      @if (!isEditingAnalysis && (i.analysis || i.actionTaken)) {
+        <!-- Saved Analysis View Mode -->
+        <div class="analysis-view-body">
+          <div class="analysis-read-item">
+            <label class="analysis-read-label" for="quickComplaintTypeSelect">Type of Complaint:</label>
+            <div class="type-dropdown-wrap">
+              <select
+                id="quickComplaintTypeSelect"
+                [ngModel]="i.complaintType || ''"
+                (ngModelChange)="onQuickTypeChange($event)"
+                class="type-select-dropdown"
+                [disabled]="savingType()"
+              >
+                <option value="" disabled>-- Select Type of Complaint --</option>
+                @for (ct of complaintTypes; track ct) {
+                  <option [value]="ct">{{ ct }}</option>
+                }
+              </select>
+              @if (savingType()) {
+                <span class="type-status-text saving">Updating...</span>
+              }
+              @if (typeUpdateSuccess()) {
+                <span class="type-status-text success">{{ typeUpdateSuccess() }}</span>
               }
             </div>
-          } @else {
-            <p class="no-data">No photos or files attached to this complaint.</p>
-          }
-        </div>
+          </div>
 
-        <!-- Comments Audit Log -->
-        <div class="card">
-          <h3>💬 Response Comments & Timeline</h3>
-          @if (i.comments && i.comments.length > 0) {
-            <div class="timeline">
-              @for (c of i.comments; track c._id) {
-                <div class="timeline-item">
-                  <div class="timeline-header">
-                    <strong>{{ c.user?.name || 'User' }}</strong>
-                    <span class="role-badge">{{ c.user?.department || c.user?.role }}</span>
-                    <span class="time">{{ c.createdAt | date: 'short' }}</span>
-                  </div>
-                  <p class="comment-body">{{ c.comment }}</p>
-                  @if (c.targetDate) {
-                    <div class="target-badge">
-                      📅 Updated Target Date: {{ c.targetDate | date: 'mediumDate' }}
+          <div class="analysis-read-item">
+            <span class="analysis-read-label">Root Cause / Technical Analysis:</span>
+            <div class="analysis-read-text">{{ i.analysis }}</div>
+          </div>
+
+          @if (i.actionTaken) {
+            <div class="analysis-read-item">
+              <span class="analysis-read-label">Action Taken / Corrective Action:</span>
+              <div class="analysis-read-text">{{ i.actionTaken }}</div>
+            </div>
+          }
+
+          @if (i.analysisPhotos && i.analysisPhotos.length > 0) {
+            <div class="analysis-read-item">
+              <span class="analysis-read-label">Analysis Attachments & Photos ({{ i.analysisPhotos.length }}):</span>
+              <div class="compact-files-list">
+                @for (photo of i.analysisPhotos; track photo) {
+                  @if (isImage(photo)) {
+                    <a [href]="getImageUrl(photo)" target="_blank" rel="noopener noreferrer" class="compact-thumb-item" [title]="getFileName(photo)">
+                      <img [src]="getImageUrl(photo)" [alt]="getFileName(photo)" />
+                      <span class="thumb-name">{{ getFileName(photo) }}</span>
+                    </a>
+                  } @else {
+                    <a [href]="getImageUrl(photo)" target="_blank" rel="noopener noreferrer" class="compact-file-item" [title]="getFileName(photo)">
+                      📎
+                      <span class="file-name">{{ getFileName(photo) }}</span>
+                    </a>
+                  }
+                }
+              </div>
+            </div>
+          }
+
+          <div class="analysis-status-pill-row">
+            <span class="meta-label">Current Ticket Status:</span>
+            <span class="status-badge" [ngClass]="getStatusClass(i.status)">
+              {{ i.status }}
+            </span>
+          </div>
+        </div>
+      } @else {
+        <!-- Analysis Edit / Entry Mode -->
+        <div class="analysis-form-body">
+          <div class="form-group">
+            <label class="form-label" for="complaintTypeSelect">
+              Type of Complaint <span class="text-danger">*</span>
+            </label>
+            <select
+              id="complaintTypeSelect"
+              [(ngModel)]="analysisComplaintType"
+              class="form-select-full"
+            >
+              <option value="">-- Select Type of Complaint --</option>
+              @for (ct of complaintTypes; track ct) {
+                <option [value]="ct">{{ ct }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="analysisInput">
+              Root Cause / Technical Analysis <span class="text-danger">*</span>
+            </label>
+            <textarea
+              id="analysisInput"
+              [(ngModel)]="analysisText"
+              rows="3"
+              class="form-textarea"
+              placeholder="Enter technical observations, root cause diagnosis, failure analysis..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="actionTakenInput">
+              Action Taken / Corrective Action
+            </label>
+            <textarea
+              id="actionTakenInput"
+              [(ngModel)]="actionTakenText"
+              rows="2"
+              class="form-textarea"
+              placeholder="Describe corrective actions performed, parts serviced/replaced, checks carried out..."
+            ></textarea>
+          </div>
+
+          <!-- File / Photo Upload for Analysis Team -->
+          <div class="form-group">
+            <label class="form-label" for="analysisFilesInput">
+              Upload Photos & Files (Analysis Team)
+            </label>
+            
+            <div class="analysis-upload-container">
+              <label for="analysisFilesInput" class="custom-file-upload-btn">
+                📎 Choose Photos / Files
+              </label>
+              <input
+                type="file"
+                id="analysisFilesInput"
+                (change)="onAnalysisFileSelected($event)"
+                multiple
+                class="hidden-file-input"
+              />
+              <span class="upload-help-text">
+                Accepts photos (JPG, PNG, WEBP) & documents (PDF, DOCX, XLSX, TXT, LOG)
+              </span>
+            </div>
+
+            <!-- Previews of newly selected files -->
+            @if (analysisFilePreviews.length > 0) {
+              <div class="selected-files-list">
+                <span class="upload-sub-label">Ready to Upload ({{ analysisFilePreviews.length }}):</span>
+                <div class="preview-chips-container">
+                  @for (file of analysisFilePreviews; track $index) {
+                    <div class="file-chip">
+                      @if (file.isImage && file.previewUrl) {
+                        <img [src]="file.previewUrl" [alt]="file.name" class="chip-thumb" />
+                      } @else {
+                        <span class="chip-icon">📄</span>
+                      }
+                      <span class="chip-name" [title]="file.name">{{ file.name }}</span>
+                      <button
+                        type="button"
+                        (click)="removeSelectedAnalysisFile($index)"
+                        class="chip-remove-btn"
+                        title="Remove file"
+                      >
+                        ✕
+                      </button>
                     </div>
                   }
                 </div>
+              </div>
+            }
+
+            <!-- Existing analysis photos (if editing) with option to remove -->
+            @if (existingAnalysisPhotos.length > 0) {
+              <div class="existing-files-list">
+                <span class="upload-sub-label">Attached Files ({{ existingAnalysisPhotos.length }}):</span>
+                <div class="preview-chips-container">
+                  @for (photo of existingAnalysisPhotos; track $index) {
+                    <div class="file-chip existing">
+                      @if (isImage(photo)) {
+                        <img [src]="getImageUrl(photo)" [alt]="getFileName(photo)" class="chip-thumb" />
+                      } @else {
+                        <span class="chip-icon">📎</span>
+                      }
+                      <a [href]="getImageUrl(photo)" target="_blank" rel="noopener noreferrer" class="chip-name" [title]="getFileName(photo)">
+                        {{ getFileName(photo) }}
+                      </a>
+                      <button
+                        type="button"
+                        (click)="removeExistingAnalysisPhoto($index)"
+                        class="chip-remove-btn"
+                        title="Remove existing file"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="analysis-action-bar">
+            <div class="btn-group-right">
+              @if (i.analysis || i.actionTaken) {
+                <button
+                  type="button"
+                  (click)="onCancelEditAnalysis()"
+                  class="btn-cancel"
+                  [disabled]="submittingAnalysis()"
+                >
+                  Cancel
+                </button>
               }
+              <button
+                type="button"
+                (click)="onSaveAnalysis()"
+                [disabled]="submittingAnalysis()"
+                class="btn-save-analysis"
+              >
+                {{ submittingAnalysis() ? 'Submitting...' : 'Submit' }}
+              </button>
             </div>
-          } @else {
-            <p class="no-data">No response comments added yet.</p>
-          }
+          </div>
         </div>
-      </div>
-
-      <!-- Right Column: Response & Department Re-Assignment Form -->
-      <div class="right-col">
-        <div class="card response-card">
-          <h3>✍️ Department Action & Response</h3>
-          <p class="sub-text">HBL Admin / Technicians can allocate department, add findings, or update status.</p>
-
-          @if (errorMessage()) {
-            <div class="alert alert-error">{{ errorMessage() }}</div>
-          }
-          @if (successMessage()) {
-            <div class="alert alert-success">{{ successMessage() }}</div>
-          }
-
-          <form (ngSubmit)="onSubmitResponse()">
-            <!-- Department Allocation / Re-Assignment Dropdown -->
-            <div class="form-group highlight-box">
-              <label for="reassignTo">🏢 Allocate / Re-assign Department</label>
-              <select id="reassignTo" name="reassignTo" [(ngModel)]="reassignTo" class="form-control">
-                @for (u of users(); track u._id) {
-                  <option [value]="u._id">
-                    {{ u.name }} ({{ u.department || u.role }}) — {{ u.email }}
-                  </option>
-                }
-              </select>
-              <span class="field-tip">Re-assigning updates complaint assignee to the selected department/person.</span>
-            </div>
-
-            <div class="form-group">
-              <label for="status">Update Status</label>
-              <select id="status" name="status" [(ngModel)]="status" class="form-control">
-                <option value="OPEN">Open</option>
-                <option value="IN_PROGRESS">In Progress</option>
-                <option value="RESOLVED">Resolved</option>
-                <option value="CLOSED">Closed</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="targetDate">Expected Completion Date</label>
-              <input
-                type="date"
-                id="targetDate"
-                name="targetDate"
-                [(ngModel)]="expectedCompletionDate"
-                class="form-control"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="comment">Response Comment</label>
-              <textarea
-                id="comment"
-                name="comment"
-                rows="4"
-                [(ngModel)]="comment"
-                placeholder="Write inspection findings, department comments, or action taken..."
-                class="form-control"
-              ></textarea>
-            </div>
-
-            <button type="submit" [disabled]="submitting()" class="btn-submit">
-              {{ submitting() ? 'Updating...' : 'Submit Action & Update Assignee' }}
-            </button>
-          </form>
-        </div>
-      </div>
+      }
     </div>
   }
 </div>

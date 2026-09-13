@@ -5,17 +5,7 @@
     </a>
 
     <div class="nav-links">
-      @if (authService.currentUser()) {
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
-        <a routerLink="/create-issue" routerLinkActive="active" class="nav-item btn-primary">+ Log Complaint</a>
-        <div class="user-info">
-          <span class="user-badge">{{ authService.currentUser()?.name }} ({{ authService.currentUser()?.role }})</span>
-          <button (click)="logout()" class="btn-logout">Logout</button>
-        </div>
-      } @else {
-        <a routerLink="/login" routerLinkActive="active" class="nav-item">Login</a>
-        <a routerLink="/register" routerLinkActive="active" class="nav-item btn-secondary">Register</a>
-      }
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
     </div>
   </div>
 </nav>

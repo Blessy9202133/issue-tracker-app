@@ -17,24 +17,21 @@
       <div class="metric-value">{{ openCount() }}</div>
       <div class="metric-label">Open</div>
     </div>
-    <div class="metric-card metric-progress">
-      <div class="metric-value">{{ inProgressCount() }}</div>
-      <div class="metric-label">In Progress</div>
-    </div>
     <div class="metric-card metric-resolved">
-      <div class="metric-value">{{ resolvedCount() }}</div>
-      <div class="metric-label">Resolved / Closed</div>
+      <div class="metric-value">{{ analysedCount() }}</div>
+      <div class="metric-label">Analysed</div>
     </div>
   </div>
 
   <!-- Filter Controls -->
   <div class="filters-card">
     <div class="filter-group">
-      <label>Category Template</label>
-      <select [(ngModel)]="complaintCategoryFilter" (change)="onFilterChange()" class="filter-control">
-        <option value="">All Categories</option>
-        <option value="WAYSIDE">Wayside Complaints</option>
-        <option value="ONBOARD">Onboard Complaints</option>
+      <label>Type of Complaint</label>
+      <select [(ngModel)]="complaintTypeFilter" (change)="onFilterChange()" class="filter-control">
+        <option value="">All Types</option>
+        @for (ct of complaintTypes; track ct) {
+          <option [value]="ct">{{ ct }}</option>
+        }
       </select>
     </div>
 
@@ -58,13 +55,6 @@
         }
       </select>
     </div>
-
-    <div class="filter-group filter-checkbox">
-      <label>
-        <input type="checkbox" [(ngModel)]="assignedToMeFilter" (change)="onFilterChange()" />
-        Assigned to Me Only
-      </label>
-    </div>
   </div>
 
   <!-- Complaint List Table -->
@@ -86,14 +76,14 @@
         <thead>
           <tr>
             <th>Code</th>
-            <th>Category</th>
-            <th>Zone / Location</th>
-            <th>Complaint Details</th>
+            <th>Zone & Location</th>
             <th>Raised Date</th>
-            <th>Photos</th>
-            <th>Assignee</th>
+            <th>Closed Date</th>
+            <th>Photos / Files</th>
+            <th>Type of Complaint</th>
             <th>Status</th>
             <th>Action</th>
+            <th>Edit</th>
           </tr>
         </thead>
         <tbody>
@@ -101,38 +91,36 @@
             <tr>
               <td class="font-bold">{{ issue.issueCode }}</td>
               <td>
-                <span class="category-badge" [class.badge-wayside]="issue.complaintCategory === 'WAYSIDE'" [class.badge-onboard]="issue.complaintCategory === 'ONBOARD'">
-                  {{ issue.complaintCategory === 'WAYSIDE' ? 'Wayside' : 'Onboard' }}
-                </span>
-              </td>
-              <td>
                 <div class="zone-tag">{{ issue.zone }}</div>
-                @if (issue.complaintCategory === 'WAYSIDE') {
-                  <div class="sub-location">Stn: {{ issue.station || 'N/A' }}</div>
-                  @if (issue.complaintType) {
-                    <div class="type-sub">({{ issue.complaintType }})</div>
-                  }
-                } @else {
-                  <div class="sub-location">Shed: {{ issue.shed || 'N/A' }}</div>
-                  @if (issue.locoNumber) {
-                    <div class="type-sub">Loco: {{ issue.locoNumber }}</div>
-                  }
+                <div class="sub-location">Div: {{ issue.contract || 'N/A' }}</div>
+                @if (issue.station) {
+                  <div class="type-sub">Stn: {{ issue.station }}</div>
+                }
+                @if (issue.locoNumber) {
+                  <div class="type-sub">Loco: {{ issue.locoNumber }}</div>
                 }
               </td>
-              <td class="details-cell" [title]="issue.details">
-                {{ issue.details }}
+              <td>{{ issue.issueRaisedDate | date: 'medium' }}</td>
+              <td>
+                @if (issue.closedDate || (issue.status === 'CLOSED' && issue.updatedAt)) {
+                  <span class="closed-date-text">{{ (issue.closedDate || issue.updatedAt) | date: 'medium' }}</span>
+                } @else {
+                  <span class="no-data-dash">-</span>
+                }
               </td>
-              <td>{{ issue.issueRaisedDate | date: 'mediumDate' }}</td>
               <td>
                 @if (issue.photos && issue.photos.length > 0) {
-                  <span class="photo-badge">📷 {{ issue.photos.length }}</span>
+                  <span class="photo-badge">📎 {{ issue.photos.length }}</span>
                 } @else {
                   <span class="no-photo">-</span>
                 }
               </td>
               <td>
-                <div class="user-cell">{{ issue.assignedTo?.name || 'Unassigned' }}</div>
-                <div class="email-sub">{{ issue.assignedTo?.department || issue.assignedTo?.role || issue.assignedTo?.email }}</div>
+                @if (issue.complaintType) {
+                  <span class="complaint-type-pill">{{ issue.complaintType }}</span>
+                } @else {
+                  <span class="no-data-dash">-</span>
+                }
               </td>
               <td>
                 <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
@@ -140,9 +128,24 @@
                 </span>
               </td>
               <td>
-                <a [routerLink]="['/issues', issue._id]" class="btn-action">
-                  View & Respond
-                </a>
+                @if (issue.status === 'CLOSED') {
+                  <a [routerLink]="['/issues', issue._id]" class="btn-action btn-view-only">
+                    View
+                  </a>
+                } @else {
+                  <a [routerLink]="['/issues', issue._id]" class="btn-action btn-respond">
+                    View / Respond
+                  </a>
+                }
+              </td>
+              <td>
+                @if (issue.status !== 'CLOSED') {
+                  <a [routerLink]="['/create-issue']" [queryParams]="{ id: issue._id }" class="btn-action btn-edit-col" title="Edit complaint in Log Complaint page">
+                    ✏️ Edit
+                  </a>
+                } @else {
+                  <span class="no-data-dash">-</span>
+                }
               </td>
             </tr>
           }

@@ -19,24 +19,12 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter validation (images only)
-const checkFileTypes = (file, cb) => {
-  const filetypes = /jpg|jpeg|png|gif|webp/;
-  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = filetypes.test(file.mimetype);
-
-  if (extname && mimetype) {
-    return cb(null, true);
-  } else {
-    cb(new Error('Only images (JPEG, PNG, GIF, WEBP) are allowed!'));
-  }
-};
-
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB limit
   fileFilter: (req, file, cb) => {
-    checkFileTypes(file, cb);
+    // Accept all file types: photos (JPG, PNG, GIF, WEBP) and all documents/files
+    cb(null, true);
   },
 });
 

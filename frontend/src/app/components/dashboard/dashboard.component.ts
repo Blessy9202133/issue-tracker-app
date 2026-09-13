@@ -1,9 +1,8 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { IssueService } from '../../services/issue.service';
-import { AuthService } from '../../services/auth.service';
 import { Issue } from '../../models/issue.model';
 
 @Component({
@@ -20,17 +19,20 @@ export class DashboardComponent implements OnInit {
   errorMessage = signal<string>('');
 
   // Filters
+  complaintTypeFilter = '';
   statusFilter = '';
   complaintCategoryFilter = '';
   zoneFilter = '';
   shedFilter = '';
-  assignedToMeFilter = false;
+
+  complaintTypes = ['Wayside', 'Onboard Side', 'NMS', 'Hardware', 'Other'];
 
   // Computed metrics from reactive signal
   totalCount = computed(() => this.issues().length);
   openCount = computed(() => this.issues().filter((i) => i.status === 'OPEN').length);
   inProgressCount = computed(() => this.issues().filter((i) => i.status === 'IN_PROGRESS').length);
-  resolvedCount = computed(() => this.issues().filter((i) => i.status === 'RESOLVED' || i.status === 'CLOSED').length);
+  analysedCount = computed(() => this.issues().filter((i) => !!i.analysis || i.status === 'RESOLVED' || i.status === 'CLOSED').length);
+  resolvedCount = computed(() => this.analysedCount());
 
   zones = [
     'Central Railway',
@@ -55,9 +57,7 @@ export class DashboardComponent implements OnInit {
   ];
 
   private issueService = inject(IssueService);
-  authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
-  private router = inject(Router);
 
   ngOnInit(): void {
     this.fetchIssues();
@@ -71,10 +71,10 @@ export class DashboardComponent implements OnInit {
     this.issueService
       .getIssues({
         status: this.statusFilter,
+        complaintType: this.complaintTypeFilter,
         complaintCategory: this.complaintCategoryFilter,
         zone: this.zoneFilter,
         shed: this.shedFilter,
-        assignedToMe: this.assignedToMeFilter,
       })
       .subscribe({
         next: (issuesList) => {
@@ -86,10 +86,7 @@ export class DashboardComponent implements OnInit {
         error: (err) => {
           console.error('Error loading complaints on dashboard:', err);
           this.loading.set(false);
-          if (err.status === 401) {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          } else if (err.status === 0) {
+          if (err.status === 0) {
             this.errorMessage.set('Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev');
           } else {
             this.errorMessage.set(err.error?.message || 'Failed to load complaints from server.');

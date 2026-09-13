@@ -1,16 +1,5 @@
-import { inject } from '@angular/core';
-import { Router, CanActivateFn } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { CanActivateFn } from '@angular/router';
 
-export const authGuard: CanActivateFn = (route, state) => {
-  const authService = inject(AuthService);
-  const router = inject(Router);
-
-  if (authService.isLoggedIn()) {
-    return true;
-  }
-
-  // Redirect to login page if session is missing or expired
-  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-  return false;
+export const authGuard: CanActivateFn = () => {
+  return true;
 };

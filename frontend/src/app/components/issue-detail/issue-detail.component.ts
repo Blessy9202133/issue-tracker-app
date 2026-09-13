@@ -1,12 +1,10 @@
 import { Component, OnInit, OnDestroy, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IssueService } from '../../services/issue.service';
-import { AuthService } from '../../services/auth.service';
 import { Issue } from '../../models/issue.model';
-import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-issue-detail',
@@ -22,23 +20,34 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
   submitting = signal<boolean>(false);
-  users = signal<User[]>([]);
+  closing = signal<boolean>(false);
 
-  // Form Fields
+  // Form / Analysis Fields
   comment = '';
   expectedCompletionDate = '';
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' = 'IN_PROGRESS';
-  reassignTo = '';
+  analysisText = '';
+  actionTakenText = '';
+  analysisComplaintType = '';
+  analysisStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' = 'OPEN';
+  isEditingAnalysis = false;
+  submittingAnalysis = signal<boolean>(false);
+  savingType = signal<boolean>(false);
+  typeUpdateSuccess = signal<string>('');
+
+  // Analysis Files / Photos
+  selectedAnalysisFiles: File[] = [];
+  analysisFilePreviews: { name: string; isImage: boolean; previewUrl?: string }[] = [];
+  existingAnalysisPhotos: string[] = [];
+
+  complaintTypes = ['Wayside', 'Onboard Side', 'NMS', 'Hardware', 'Other'];
 
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private issueService = inject(IssueService);
-  authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private routeSub: Subscription | null = null;
 
   ngOnInit(): void {
-    this.loadUsers();
     this.routeSub = this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
@@ -57,22 +66,6 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadUsers(): void {
-    this.authService.getUsers().subscribe({
-      next: (users) => {
-        this.users.set(users);
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Error fetching users for re-assignment:', err);
-        if (err.status === 401) {
-          this.authService.logout();
-          this.router.navigate(['/login']);
-        }
-      },
-    });
-  }
-
   loadIssue(id: string): void {
     this.loading.set(true);
     this.errorMessage.set('');
@@ -83,7 +76,14 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
         this.issue.set(issueData);
         if (issueData) {
           this.status = issueData.status || 'OPEN';
-          this.reassignTo = issueData.assignedTo?._id || '';
+          this.analysisText = issueData.analysis || '';
+          this.actionTakenText = issueData.actionTaken || '';
+          this.analysisComplaintType = issueData.complaintType || '';
+          this.analysisStatus = issueData.status || 'OPEN';
+          this.isEditingAnalysis = !issueData.analysis;
+          this.existingAnalysisPhotos = issueData.analysisPhotos ? [...issueData.analysisPhotos] : [];
+          this.selectedAnalysisFiles = [];
+          this.analysisFilePreviews = [];
           if (issueData.expectedCompletionDate) {
             this.expectedCompletionDate = new Date(issueData.expectedCompletionDate)
               .toISOString()
@@ -97,10 +97,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Error fetching complaint details:', err);
         this.loading.set(false);
-        if (err.status === 401) {
-          this.authService.logout();
-          this.router.navigate(['/login']);
-        } else if (err.status === 0) {
+        if (err.status === 0) {
           this.errorMessage.set('Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev');
         } else {
           this.errorMessage.set(err.error?.message || 'Failed to load complaint details from server.');
@@ -111,51 +108,221 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSubmitResponse(): void {
+  onCloseComplaint(): void {
     const currentIssue = this.issue();
     if (!currentIssue) return;
 
-    const isReassigned = this.reassignTo && this.reassignTo !== currentIssue.assignedTo?._id;
-
-    if (!this.comment && !this.expectedCompletionDate && !isReassigned && this.status === currentIssue.status) {
-      this.errorMessage.set('Please provide a comment, update completion date, change status, or re-assign to a department.');
+    if (!currentIssue.complaintType && !this.analysisComplaintType) {
+      this.errorMessage.set('Please select Type of Complaint in the Analysis section before closing the ticket.');
+      this.isEditingAnalysis = true;
       this.cdr.markForCheck();
       return;
     }
 
-    this.submitting.set(true);
+    this.closing.set(true);
     this.errorMessage.set('');
     this.successMessage.set('');
     this.cdr.markForCheck();
 
     this.issueService
       .respondToIssue(currentIssue._id, {
-        comment: this.comment,
-        expectedCompletionDate: this.expectedCompletionDate,
-        status: this.status,
-        reassignTo: this.reassignTo,
+        status: 'CLOSED',
+        complaintType: this.analysisComplaintType || currentIssue.complaintType,
       })
       .subscribe({
         next: (updatedIssue) => {
           this.issue.set(updatedIssue);
-          this.comment = '';
-          this.submitting.set(false);
-          this.successMessage.set(
-            isReassigned
-              ? `Complaint re-assigned to ${updatedIssue.assignedTo?.name} (${updatedIssue.assignedTo?.department || 'Department'})!`
-              : 'Response submitted successfully!'
-          );
+          this.closing.set(false);
+          this.analysisStatus = 'CLOSED';
+          this.successMessage.set('Complaint has been marked as Closed.');
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
         error: (err) => {
-          this.submitting.set(false);
-          if (err.status === 401) {
-            this.authService.logout();
-            this.router.navigate(['/login']);
-          } else {
-            this.errorMessage.set(err.error?.message || 'Failed to submit response.');
-          }
+          this.closing.set(false);
+          this.errorMessage.set(err.error?.message || 'Failed to close complaint.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  onReopenComplaint(): void {
+    const currentIssue = this.issue();
+    if (!currentIssue) return;
+
+    this.closing.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.cdr.markForCheck();
+
+    this.issueService
+      .respondToIssue(currentIssue._id, {
+        status: 'OPEN',
+      })
+      .subscribe({
+        next: (updatedIssue) => {
+          this.issue.set(updatedIssue);
+          this.closing.set(false);
+          this.analysisStatus = 'OPEN';
+          this.successMessage.set('Complaint has been reopened.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.closing.set(false);
+          this.errorMessage.set(err.error?.message || 'Failed to reopen complaint.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  onAnalysisFileSelected(event: any): void {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newFiles: File[] = Array.from(files);
+      this.selectedAnalysisFiles = [...this.selectedAnalysisFiles, ...newFiles];
+
+      newFiles.forEach((file) => {
+        const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file.name);
+        if (isImage) {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            this.analysisFilePreviews.push({ name: file.name, isImage: true, previewUrl: e.target.result });
+            this.cdr.markForCheck();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          this.analysisFilePreviews.push({ name: file.name, isImage: false });
+        }
+      });
+      this.cdr.markForCheck();
+      // Reset input element so user can choose the same file again if desired
+      event.target.value = '';
+    }
+  }
+
+  removeSelectedAnalysisFile(index: number): void {
+    this.selectedAnalysisFiles.splice(index, 1);
+    this.analysisFilePreviews.splice(index, 1);
+    this.cdr.markForCheck();
+  }
+
+  removeExistingAnalysisPhoto(index: number): void {
+    this.existingAnalysisPhotos.splice(index, 1);
+    this.cdr.markForCheck();
+  }
+
+  onSaveAnalysis(): void {
+    const currentIssue = this.issue();
+    if (!currentIssue) return;
+
+    if (!this.analysisComplaintType) {
+      this.errorMessage.set('Please select Type of Complaint.');
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (!this.analysisText.trim()) {
+      this.errorMessage.set('Please provide Root Cause / Technical Analysis.');
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.submittingAnalysis.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.cdr.markForCheck();
+
+    const formData = new FormData();
+    formData.append('analysis', this.analysisText.trim());
+    formData.append('actionTaken', this.actionTakenText.trim());
+    formData.append('complaintType', this.analysisComplaintType);
+    formData.append('status', 'CLOSED');
+    formData.append('existingAnalysisPhotos', JSON.stringify(this.existingAnalysisPhotos));
+
+    this.selectedAnalysisFiles.forEach((file) => {
+      formData.append('analysisPhotos', file);
+    });
+
+    this.issueService
+      .respondToIssue(currentIssue._id, formData)
+      .subscribe({
+        next: (updatedIssue) => {
+          this.issue.set(updatedIssue);
+          this.submittingAnalysis.set(false);
+          this.isEditingAnalysis = false;
+          this.analysisStatus = 'CLOSED';
+          this.selectedAnalysisFiles = [];
+          this.analysisFilePreviews = [];
+          this.existingAnalysisPhotos = updatedIssue.analysisPhotos ? [...updatedIssue.analysisPhotos] : [];
+          this.successMessage.set('Analysis & files submitted successfully and complaint is now Closed.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.submittingAnalysis.set(false);
+          this.errorMessage.set(err.error?.message || 'Failed to save analysis.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  onEditAnalysis(): void {
+    const currentIssue = this.issue();
+    this.existingAnalysisPhotos = currentIssue?.analysisPhotos ? [...currentIssue.analysisPhotos] : [];
+    this.selectedAnalysisFiles = [];
+    this.analysisFilePreviews = [];
+    this.isEditingAnalysis = true;
+    this.cdr.markForCheck();
+  }
+
+  onCancelEditAnalysis(): void {
+    const currentIssue = this.issue();
+    if (currentIssue) {
+      this.analysisText = currentIssue.analysis || '';
+      this.actionTakenText = currentIssue.actionTaken || '';
+      this.analysisComplaintType = currentIssue.complaintType || '';
+      this.analysisStatus = currentIssue.status || 'OPEN';
+      this.existingAnalysisPhotos = currentIssue.analysisPhotos ? [...currentIssue.analysisPhotos] : [];
+    }
+    this.selectedAnalysisFiles = [];
+    this.analysisFilePreviews = [];
+    this.isEditingAnalysis = false;
+    this.cdr.markForCheck();
+  }
+
+  onQuickTypeChange(newType: string): void {
+    const currentIssue = this.issue();
+    if (!currentIssue || !newType || newType === currentIssue.complaintType) return;
+
+    this.savingType.set(true);
+    this.analysisComplaintType = newType;
+    this.errorMessage.set('');
+    this.typeUpdateSuccess.set('');
+    this.cdr.markForCheck();
+
+    this.issueService
+      .respondToIssue(currentIssue._id, {
+        complaintType: newType,
+      })
+      .subscribe({
+        next: (updatedIssue) => {
+          this.issue.set(updatedIssue);
+          this.savingType.set(false);
+          this.typeUpdateSuccess.set('✓ Type updated');
+          setTimeout(() => {
+            this.typeUpdateSuccess.set('');
+            this.cdr.markForCheck();
+          }, 3000);
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.savingType.set(false);
+          this.errorMessage.set(err.error?.message || 'Failed to update complaint type.');
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
@@ -166,6 +333,16 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     if (!path) return '';
     if (path.startsWith('http')) return path;
     return `http://127.0.0.1:5000${path}`;
+  }
+
+  isImage(path: string): boolean {
+    if (!path) return false;
+    return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(path);
+  }
+
+  getFileName(path: string): string {
+    if (!path) return 'File';
+    return path.split('/').pop()?.split('\\').pop() || 'File';
   }
 
   getStatusClass(status: string): string {

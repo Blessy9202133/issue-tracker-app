@@ -20,6 +20,7 @@ export class IssueService {
 
   getIssues(filters?: {
     status?: string;
+    complaintType?: string;
     complaintCategory?: string;
     zone?: string;
     shed?: string;
@@ -28,6 +29,7 @@ export class IssueService {
     let params = new HttpParams();
     if (filters) {
       if (filters.status) params = params.set('status', filters.status);
+      if (filters.complaintType) params = params.set('complaintType', filters.complaintType);
       if (filters.complaintCategory) params = params.set('complaintCategory', filters.complaintCategory);
       if (filters.zone) params = params.set('zone', filters.zone);
       if (filters.shed) params = params.set('shed', filters.shed);
@@ -46,8 +48,14 @@ export class IssueService {
     });
   }
 
-  respondToIssue(id: string, dto: RespondIssueDto): Observable<Issue> {
+  respondToIssue(id: string, dto: RespondIssueDto | FormData): Observable<Issue> {
     return this.http.put<Issue>(`${this.apiUrl}/${id}/respond`, dto, {
+      headers: this.authService.getAuthHeaders(),
+    });
+  }
+
+  updateIssue(id: string, formData: FormData): Observable<Issue> {
+    return this.http.put<Issue>(`${this.apiUrl}/${id}`, formData, {
       headers: this.authService.getAuthHeaders(),
     });
   }

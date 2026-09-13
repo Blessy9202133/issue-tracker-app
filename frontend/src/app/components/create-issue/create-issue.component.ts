@@ -1,10 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { IssueService } from '../../services/issue.service';
-import { AuthService } from '../../services/auth.service';
-import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-create-issue',
@@ -14,35 +12,26 @@ import { User } from '../../models/user.model';
   styleUrl: './create-issue.component.css',
 })
 export class CreateIssueComponent implements OnInit {
-  // Template Selector: 'WAYSIDE' or 'ONBOARD'
-  complaintCategory: 'WAYSIDE' | 'ONBOARD' = 'WAYSIDE';
+  // Mode & Edit tracking
+  isEditMode = signal<boolean>(false);
+  editId = signal<string>('');
+  issueCode = signal<string>('');
+  loadingComplaint = signal<boolean>(false);
 
-  // Common Fields
+  // Form Fields
   zone = 'South Central Railway';
   contract = '';
-  details = '';
-  issueRaisedDate = new Date().toISOString().substring(0, 10);
-  assignedTo = '';
-  selectedFiles: File[] = [];
-  previewUrls: string[] = [];
-
-  // Wayside Fields
   station = '';
-  complaintType = 'NMS';
-
-  // Onboard Fields
-  shed = '';
   locoNumber = '';
-  locoType = 'WAP-7';
-  brakeType = 'E-70';
-  failureType = '';
-  poLoaNumber = '';
+  details = '';
+  issueRaisedDate = this.getCurrentDateTimeLocal();
+  existingPhotos = signal<string[]>([]);
+  selectedFiles: File[] = [];
+  filePreviews: { name: string; isImage: boolean; previewUrl?: string }[] = [];
 
-  users: User[] = [];
-  loadingUsers = true;
-  submitting = false;
-  errorMessage = '';
-  successMessage = '';
+  submitting = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  successMessage = signal<string>('');
 
   zones = [
     'Central Railway',
@@ -66,148 +55,236 @@ export class CreateIssueComponent implements OnInit {
     'West Central Railway',
   ];
 
-  complaintTypes = [
-    'NMS',
-    'Application Related',
-    'Others',
-  ];
-
-  locoTypes = [
-    'WAP-7',
-    'WAP-5',
-    'WAP-9',
-    'WAP-4',
-    'WAG-7',
-    'WAG-9',
-    'WAG-9I',
-    'WAG-9H',
-    'WAG-9HC',
-    'WAG-10HC',
-    'WDG',
-    'WDG-2',
-    'WDG-3',
-    'WDG-3A',
-    'EMU',
-    'MEMU',
-    'Vande Bharat',
-    'Amrit Bharat',
-    'WDM',
-    'WDM-3',
-    'WDS-6',
-    'EF-9K',
-  ];
-
-  brakeTypes = [
-    'E-70',
-    'CCB',
-    'IRAB',
-    'Conventional',
-    'RCCB',
-    'ESCORT',
-  ];
-
   private issueService = inject(IssueService);
-  private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
-    this.loadUsers();
+    this.route.queryParamMap.subscribe((queryParams) => {
+      const qId = queryParams.get('id');
+      if (qId) {
+        this.loadComplaint(qId);
+      } else {
+        const pId = this.route.snapshot.paramMap.get('id');
+        if (pId) {
+          this.loadComplaint(pId);
+        }
+      }
+    });
   }
 
-  loadUsers(): void {
-    this.authService.getUsers().subscribe({
-      next: (users) => {
-        this.users = users;
-        this.loadingUsers = false;
-        if (users.length > 0) {
-          // Default to HBL Admin user if present, else first user
-          const adminUser = users.find((u) => u.role === 'ADMIN' || u.email === 'admin@hbl.com' || u.name.includes('HBL'));
-          this.assignedTo = adminUser ? adminUser._id : users[0]._id;
+  loadComplaint(id: string): void {
+    this.isEditMode.set(true);
+    this.editId.set(id);
+    this.loadingComplaint.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.cdr.markForCheck();
+
+    this.issueService.getIssueById(id).subscribe({
+      next: (issue) => {
+        if (issue.status === 'CLOSED') {
+          this.loadingComplaint.set(false);
+          this.errorMessage.set('This complaint is CLOSED and cannot be edited. Redirecting...');
+          this.cdr.markForCheck();
+          setTimeout(() => {
+            this.router.navigate(['/issues', id]);
+          }, 1200);
+          return;
         }
+
+        this.zone = issue.zone || 'South Central Railway';
+        this.contract = issue.contract || '';
+        this.station = issue.station || '';
+        this.locoNumber = issue.locoNumber || '';
+        this.details = issue.details || '';
+        this.issueRaisedDate = this.formatDateTimeLocal(issue.issueRaisedDate);
+        this.existingPhotos.set(issue.photos || []);
+        this.issueCode.set(issue.issueCode || '');
+        this.loadingComplaint.set(false);
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching users:', err);
-        this.loadingUsers = false;
+        this.loadingComplaint.set(false);
+        this.errorMessage.set(err.error?.message || 'Failed to load complaint details.');
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
     });
   }
 
-  setCategory(category: 'WAYSIDE' | 'ONBOARD'): void {
-    this.complaintCategory = category;
+  getCurrentDateTimeLocal(): string {
+    const now = new Date();
+    const pad = (value: number) => String(value).padStart(2, '0');
+
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  }
+
+  formatDateTimeLocal(dateInput?: string | Date): string {
+    if (!dateInput) return this.getCurrentDateTimeLocal();
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return this.getCurrentDateTimeLocal();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   onFileChange(event: any): void {
     const files = event.target.files;
     if (files && files.length > 0) {
-      this.selectedFiles = Array.from(files);
-      this.previewUrls = [];
+      const newFiles: File[] = Array.from(files);
+      this.selectedFiles = [...this.selectedFiles, ...newFiles];
 
-      this.selectedFiles.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.previewUrls.push(e.target.result);
-        };
-        reader.readAsDataURL(file);
+      newFiles.forEach((file) => {
+        const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file.name);
+        if (isImage) {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            this.filePreviews.push({ name: file.name, isImage: true, previewUrl: e.target.result });
+            this.cdr.markForCheck();
+          };
+          reader.readAsDataURL(file);
+        } else {
+          this.filePreviews.push({ name: file.name, isImage: false });
+        }
       });
+      this.cdr.markForCheck();
+      event.target.value = '';
     }
+  }
+
+  removeSelectedFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+    this.filePreviews.splice(index, 1);
+    this.cdr.markForCheck();
+  }
+
+  removeExistingPhoto(index: number): void {
+    const photos = [...this.existingPhotos()];
+    photos.splice(index, 1);
+    this.existingPhotos.set(photos);
+    this.cdr.markForCheck();
+  }
+
+  getImageUrl(path: string): string {
+    if (!path) return '';
+    if (path.startsWith('http')) return path;
+    return `http://127.0.0.1:5000${path}`;
+  }
+
+  isImage(path: string): boolean {
+    if (!path) return false;
+    return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(path);
+  }
+
+  getFileName(path: string): string {
+    if (!path) return 'File';
+    return path.split('/').pop()?.split('\\').pop() || 'File';
+  }
+
+  getWordCount(text: string): number {
+    if (!text) return 0;
+    const words = text.trim().split(/\s+/).filter((w) => w.length > 0);
+    return words.length;
   }
 
   onSubmit(): void {
     if (!this.zone || !this.details) {
-      this.errorMessage = 'Please complete all required fields (Zone and Description).';
+      this.errorMessage.set('Please complete all required fields (Zone and Description).');
+      this.cdr.markForCheck();
       return;
     }
 
-    if (this.complaintCategory === 'WAYSIDE' && !this.station) {
-      this.errorMessage = 'Station is required for Wayside complaints.';
+    if (this.getWordCount(this.details) > 1000) {
+      this.errorMessage.set('Complaint Description exceeds the limit of 1,000 words. Please shorten your description.');
+      this.cdr.markForCheck();
       return;
     }
 
-    if (this.complaintCategory === 'ONBOARD' && (!this.shed || !this.locoNumber)) {
-      this.errorMessage = 'Shed Name and Loco Number are required for Onboard complaints.';
+    if (!this.contract) {
+      this.errorMessage.set('Division is required.');
+      this.cdr.markForCheck();
       return;
     }
 
-    this.submitting = true;
-    this.errorMessage = '';
-    this.successMessage = '';
+    if (this.locoNumber && this.locoNumber.trim() && !/^\d+$/.test(this.locoNumber.trim())) {
+      this.errorMessage.set('Loco Number must contain only digits.');
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.submitting.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    this.cdr.markForCheck();
 
     const formData = new FormData();
-    formData.append('complaintCategory', this.complaintCategory);
     formData.append('zone', this.zone);
-    formData.append('contract', this.contract);
-    formData.append('details', this.details);
+    formData.append('contract', this.contract.trim());
+    formData.append('details', this.details.trim());
+    formData.append('station', this.station ? this.station.trim() : '');
+    formData.append('locoNumber', this.locoNumber ? this.locoNumber.trim() : '');
     formData.append('issueRaisedDate', this.issueRaisedDate);
-    formData.append('assignedTo', this.assignedTo);
 
-    if (this.complaintCategory === 'WAYSIDE') {
-      formData.append('station', this.station);
-      formData.append('complaintType', this.complaintType);
+    if (this.isEditMode()) {
+      formData.append('existingPhotos', JSON.stringify(this.existingPhotos()));
+      this.selectedFiles.forEach((file) => {
+        formData.append('photos', file);
+      });
+
+      this.issueService.updateIssue(this.editId(), formData).subscribe({
+        next: () => {
+          this.submitting.set(false);
+          this.successMessage.set('Complaint updated successfully! Moving to View / Respond...');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.router.navigate(['/issues', this.editId()]);
+          }, 600);
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.errorMessage.set(err.error?.message || 'Failed to update complaint.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+      });
     } else {
-      formData.append('shed', this.shed);
-      formData.append('locoNumber', this.locoNumber);
-      formData.append('locoType', this.locoType);
-      formData.append('brakeType', this.brakeType);
-      formData.append('failureType', this.failureType);
-      formData.append('poLoaNumber', this.poLoaNumber);
+      if (!this.issueRaisedDate) {
+        this.issueRaisedDate = this.getCurrentDateTimeLocal();
+      }
+      formData.append('complaintCategory', 'WAYSIDE');
+      this.selectedFiles.forEach((file) => {
+        formData.append('photos', file);
+      });
+
+      this.issueService.createIssue(formData).subscribe({
+        next: (createdIssue) => {
+          this.submitting.set(false);
+          this.successMessage.set(`Complaint ${createdIssue.issueCode} logged successfully!`);
+          this.errorMessage.set('');
+          this.details = '';
+          this.station = '';
+          this.locoNumber = '';
+          this.issueRaisedDate = this.getCurrentDateTimeLocal();
+          this.selectedFiles = [];
+          this.filePreviews = [];
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+          const fileInput = document.getElementById('photos') as HTMLInputElement | null;
+          if (fileInput) {
+            fileInput.value = '';
+          }
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.errorMessage.set(err.error?.message || 'Failed to submit complaint.');
+          this.cdr.markForCheck();
+          this.cdr.detectChanges();
+        },
+      });
     }
-
-    this.selectedFiles.forEach((file) => {
-      formData.append('photos', file);
-    });
-
-    this.issueService.createIssue(formData).subscribe({
-      next: (createdIssue) => {
-        this.submitting = false;
-        this.successMessage = `Complaint ${createdIssue.issueCode} logged successfully! Routed to HBL Admin for department allocation.`;
-        setTimeout(() => {
-          this.router.navigate(['/issues', createdIssue._id]);
-        }, 1500);
-      },
-      error: (err) => {
-        this.submitting = false;
-        this.errorMessage = err.error?.message || 'Failed to submit complaint.';
-      },
-    });
   }
 }
