@@ -281,7 +281,6 @@ const updateIssue = async (req, res) => {
     if (station !== undefined) issue.station = station;
     if (locoNumber !== undefined) issue.locoNumber = locoNumber;
     if (details !== undefined) issue.details = details;
-    if (issueRaisedDate !== undefined) issue.issueRaisedDate = issueRaisedDate;
 
     // Handle existing and newly uploaded photos
     let updatedPhotos = issue.photos || [];

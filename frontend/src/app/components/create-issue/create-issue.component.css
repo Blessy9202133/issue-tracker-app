@@ -252,3 +252,11 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
 }
+
+.readonly-input {
+  background-color: #f1f5f9;
+  color: #475569;
+  cursor: not-allowed;
+  border-color: #cbd5e1;
+  font-weight: 600;
+}

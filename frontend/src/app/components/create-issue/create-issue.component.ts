@@ -24,7 +24,7 @@ export class CreateIssueComponent implements OnInit {
   station = '';
   locoNumber = '';
   details = '';
-  issueRaisedDate = this.getCurrentDateTimeLocal();
+  issueRaisedDateDisplay = signal<string>(this.formatDateTimeDisplay(new Date()));
   existingPhotos = signal<string[]>([]);
   selectedFiles: File[] = [];
   filePreviews: { name: string; isImage: boolean; previewUrl?: string }[] = [];
@@ -99,7 +99,7 @@ export class CreateIssueComponent implements OnInit {
         this.station = issue.station || '';
         this.locoNumber = issue.locoNumber || '';
         this.details = issue.details || '';
-        this.issueRaisedDate = this.formatDateTimeLocal(issue.issueRaisedDate);
+        this.issueRaisedDateDisplay.set(this.formatDateTimeDisplay(issue.issueRaisedDate));
         this.existingPhotos.set(issue.photos || []);
         this.issueCode.set(issue.issueCode || '');
         this.loadingComplaint.set(false);
@@ -115,19 +115,11 @@ export class CreateIssueComponent implements OnInit {
     });
   }
 
-  getCurrentDateTimeLocal(): string {
-    const now = new Date();
-    const pad = (value: number) => String(value).padStart(2, '0');
-
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  }
-
-  formatDateTimeLocal(dateInput?: string | Date): string {
-    if (!dateInput) return this.getCurrentDateTimeLocal();
+  formatDateTimeDisplay(dateInput?: string | Date): string {
+    if (!dateInput) return new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
     const d = new Date(dateInput);
-    if (isNaN(d.getTime())) return this.getCurrentDateTimeLocal();
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    if (isNaN(d.getTime())) return new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+    return d.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
   }
 
   onFileChange(event: any): void {
@@ -225,7 +217,6 @@ export class CreateIssueComponent implements OnInit {
     formData.append('details', this.details.trim());
     formData.append('station', this.station ? this.station.trim() : '');
     formData.append('locoNumber', this.locoNumber ? this.locoNumber.trim() : '');
-    formData.append('issueRaisedDate', this.issueRaisedDate);
 
     if (this.isEditMode()) {
       formData.append('existingPhotos', JSON.stringify(this.existingPhotos()));
@@ -252,9 +243,7 @@ export class CreateIssueComponent implements OnInit {
         },
       });
     } else {
-      if (!this.issueRaisedDate) {
-        this.issueRaisedDate = this.getCurrentDateTimeLocal();
-      }
+      formData.append('issueRaisedDate', new Date().toISOString());
       formData.append('complaintCategory', 'WAYSIDE');
       this.selectedFiles.forEach((file) => {
         formData.append('photos', file);
@@ -268,7 +257,7 @@ export class CreateIssueComponent implements OnInit {
           this.details = '';
           this.station = '';
           this.locoNumber = '';
-          this.issueRaisedDate = this.getCurrentDateTimeLocal();
+          this.issueRaisedDateDisplay.set(this.formatDateTimeDisplay(new Date()));
           this.selectedFiles = [];
           this.filePreviews = [];
           this.cdr.markForCheck();

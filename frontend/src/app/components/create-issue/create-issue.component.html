@@ -84,14 +84,15 @@
           <!-- Raised Date & Initial Assignee -->
           <div class="form-grid">
             <div class="form-group">
-              <label for="issueRaisedDate">Complaint Raised Date & Time <span class="required">*</span></label>
+              <label for="issueRaisedDate">Complaint Raised Date & Time (Auto-captured)</label>
               <input
-                type="datetime-local"
+                type="text"
                 id="issueRaisedDate"
                 name="issueRaisedDate"
-                [(ngModel)]="issueRaisedDate"
-                class="form-control"
-                required
+                [value]="issueRaisedDateDisplay()"
+                class="form-control readonly-input"
+                readonly
+                disabled
               />
             </div>
           </div>

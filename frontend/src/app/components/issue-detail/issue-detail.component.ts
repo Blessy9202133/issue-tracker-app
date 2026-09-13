@@ -40,7 +40,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   analysisFilePreviews: { name: string; isImage: boolean; previewUrl?: string }[] = [];
   existingAnalysisPhotos: string[] = [];
 
-  complaintTypes = ['Wayside', 'Onboard Side', 'NMS', 'Hardware', 'Other'];
+  complaintTypes = ['NMS', 'Application Related', 'Others'];
 
   private route = inject(ActivatedRoute);
   private issueService = inject(IssueService);
