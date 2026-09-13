@@ -28,6 +28,11 @@
         <span class="issue-code">{{ i.issueCode }}</span>
 
         <div class="status-action-wrap">
+          @if (i.status !== 'CLOSED') {
+            <a [routerLink]="['/create-issue']" [queryParams]="{ id: i._id }" class="btn-edit-complaint" title="Edit complaint details">
+              ✏️ Edit Complaint
+            </a>
+          }
           <span class="status-badge" [ngClass]="getStatusClass(i.status)">
             {{ i.status }}
           </span>

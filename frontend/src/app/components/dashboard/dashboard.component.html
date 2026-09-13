@@ -83,7 +83,6 @@
             <th>Type of Complaint</th>
             <th>Status</th>
             <th>Action</th>
-            <th>Edit</th>
           </tr>
         </thead>
         <tbody>
@@ -136,15 +135,6 @@
                   <a [routerLink]="['/issues', issue._id]" class="btn-action btn-respond">
                     View / Respond
                   </a>
-                }
-              </td>
-              <td>
-                @if (issue.status !== 'CLOSED') {
-                  <a [routerLink]="['/create-issue']" [queryParams]="{ id: issue._id }" class="btn-action btn-edit-col" title="Edit complaint in Log Complaint page">
-                    ✏️ Edit
-                  </a>
-                } @else {
-                  <span class="no-data-dash">-</span>
                 }
               </td>
             </tr>
