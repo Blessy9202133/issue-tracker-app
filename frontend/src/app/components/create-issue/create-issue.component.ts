@@ -19,7 +19,7 @@ export class CreateIssueComponent implements OnInit {
   loadingComplaint = signal<boolean>(false);
 
   // Form Fields
-  zone = 'South Central Railway';
+  zone = '';
   contract = '';
   station = '';
   locoNumber = '';
@@ -94,7 +94,7 @@ export class CreateIssueComponent implements OnInit {
           return;
         }
 
-        this.zone = issue.zone || 'South Central Railway';
+        this.zone = issue.zone || '';
         this.contract = issue.contract || '';
         this.station = issue.station || '';
         this.locoNumber = issue.locoNumber || '';
@@ -227,13 +227,13 @@ export class CreateIssueComponent implements OnInit {
       this.issueService.updateIssue(this.editId(), formData).subscribe({
         next: () => {
           this.submitting.set(false);
-          this.successMessage.set('Complaint updated successfully! Moving to View / Respond...');
+          this.successMessage.set('Complaint updated successfully! Redirecting to dashboard...');
           this.cdr.markForCheck();
           this.cdr.detectChanges();
 
           setTimeout(() => {
-            this.router.navigate(['/issues', this.editId()]);
-          }, 600);
+            this.router.navigate(['/dashboard']);
+          }, 400);
         },
         error: (err) => {
           this.submitting.set(false);
@@ -252,20 +252,14 @@ export class CreateIssueComponent implements OnInit {
       this.issueService.createIssue(formData).subscribe({
         next: (createdIssue) => {
           this.submitting.set(false);
-          this.successMessage.set(`Complaint ${createdIssue.issueCode} logged successfully!`);
+          this.successMessage.set(`Complaint ${createdIssue.issueCode} logged successfully! Redirecting to dashboard...`);
           this.errorMessage.set('');
-          this.details = '';
-          this.station = '';
-          this.locoNumber = '';
-          this.issueRaisedDateDisplay.set(this.formatDateTimeDisplay(new Date()));
-          this.selectedFiles = [];
-          this.filePreviews = [];
           this.cdr.markForCheck();
           this.cdr.detectChanges();
-          const fileInput = document.getElementById('photos') as HTMLInputElement | null;
-          if (fileInput) {
-            fileInput.value = '';
-          }
+
+          setTimeout(() => {
+            this.router.navigate(['/dashboard']);
+          }, 400);
         },
         error: (err) => {
           this.submitting.set(false);

@@ -29,6 +29,7 @@
           <div class="form-group">
             <label for="zone">Zone <span class="required">*</span></label>
             <select id="zone" name="zone" [(ngModel)]="zone" class="form-control" required>
+              <option value="" disabled selected>-- Select Zone --</option>
               @for (z of zones; track z) {
                 <option [value]="z">{{ z }}</option>
               }
@@ -70,7 +71,7 @@
               id="locoNumber"
               name="locoNumber"
               [(ngModel)]="locoNumber"
-              placeholder="Loco Number (optional)"
+              placeholder="Loco Number"
               class="form-control"
               inputmode="numeric"
               pattern="[0-9]*"
@@ -195,12 +196,10 @@
 
         <div class="form-actions">
           @if (isEditMode()) {
-            <button type="button" [routerLink]="['/issues', editId()]" class="btn-cancel">Cancel</button>
             <button type="submit" [disabled]="submitting()" class="btn-submit">
-              {{ submitting() ? 'Saving Changes...' : 'Save & Move to View / Respond' }}
+              {{ submitting() ? 'Saving Changes...' : 'Save & Move to Dashboard' }}
             </button>
           } @else {
-            <button type="button" routerLink="/dashboard" class="btn-cancel">Cancel</button>
             <button type="submit" [disabled]="submitting()" class="btn-submit">
               {{ submitting() ? 'Logging Complaint...' : 'Submit' }}
             </button>
