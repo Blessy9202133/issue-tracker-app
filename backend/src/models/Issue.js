@@ -140,7 +140,7 @@ issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ zone: 1 });
 issueSchema.index({ complaintCategory: 1 });
 
-// Auto generate issueCode before saving in YYMMDD### format based on registration date
+// Auto generate issueCode before saving in YYMMDD-01 format based on registration date
 issueSchema.pre('save', async function (next) {
   if (!this.issueCode) {
     const now = this.issueRaisedDate ? new Date(this.issueRaisedDate) : new Date();
@@ -153,8 +153,8 @@ issueSchema.pre('save', async function (next) {
       issueCode: { $regex: `^${dateKey}` },
     });
 
-    const sequence = String(count + 1).padStart(3, '0');
-    this.issueCode = `${dateKey}${sequence}`;
+    const sequence = String(count + 1).padStart(2, '0');
+    this.issueCode = `${dateKey}-${sequence}`;
   }
   next();
 });
