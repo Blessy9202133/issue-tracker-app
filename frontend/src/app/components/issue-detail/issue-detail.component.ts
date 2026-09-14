@@ -31,6 +31,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   actionTakenText = '';
   preventiveActionText = '';
   analysisComplaintType = '';
+  otherComplaintType = '';
   analysisStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' = 'OPEN';
   isEditingAnalysis = false;
   submittingAnalysis = signal<boolean>(false);
@@ -83,6 +84,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
           this.actionTakenText = issueData.actionTaken || '';
           this.preventiveActionText = issueData.preventiveAction || '';
           this.analysisComplaintType = issueData.complaintType || '';
+          this.otherComplaintType = issueData.otherComplaintType || '';
           this.analysisStatus = issueData.status || 'OPEN';
           this.isEditingAnalysis = !issueData.analysis;
           this.existingAnalysisPhotos = issueData.analysisPhotos ? [...issueData.analysisPhotos] : [];
@@ -116,8 +118,18 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     const currentIssue = this.issue();
     if (!currentIssue) return;
 
-    if (!currentIssue.complaintType && !this.analysisComplaintType) {
+    const finalType = this.analysisComplaintType || currentIssue.complaintType;
+    const finalOther = this.analysisComplaintType === 'Others' ? this.otherComplaintType : (currentIssue.otherComplaintType || this.otherComplaintType);
+
+    if (!finalType) {
       this.errorMessage.set('Please select Type of Complaint in the Analysis section before closing the ticket.');
+      this.isEditingAnalysis = true;
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (finalType === 'Others' && !finalOther?.trim()) {
+      this.errorMessage.set('Please write the complaint type comments manually before closing the ticket.');
       this.isEditingAnalysis = true;
       this.cdr.markForCheck();
       return;
@@ -131,7 +143,8 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     this.issueService
       .respondToIssue(currentIssue._id, {
         status: 'CLOSED',
-        complaintType: this.analysisComplaintType || currentIssue.complaintType,
+        complaintType: finalType,
+        otherComplaintType: finalType === 'Others' ? finalOther?.trim() : '',
       })
       .subscribe({
         next: (updatedIssue) => {
@@ -228,8 +241,20 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.analysisComplaintType === 'Others' && !this.otherComplaintType.trim()) {
+      this.errorMessage.set('Please write the complaint type comments manually.');
+      this.cdr.markForCheck();
+      return;
+    }
+
     if (!this.analysisText.trim()) {
       this.errorMessage.set('Please provide Root Cause / Technical Analysis.');
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (!this.actionTakenText.trim()) {
+      this.errorMessage.set('Please provide Corrective Action.');
       this.cdr.markForCheck();
       return;
     }
@@ -244,6 +269,11 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     formData.append('actionTaken', this.actionTakenText.trim());
     formData.append('preventiveAction', this.preventiveActionText.trim());
     formData.append('complaintType', this.analysisComplaintType);
+    if (this.analysisComplaintType === 'Others') {
+      formData.append('otherComplaintType', this.otherComplaintType.trim());
+    } else {
+      formData.append('otherComplaintType', '');
+    }
     formData.append('status', 'CLOSED');
     formData.append('existingAnalysisPhotos', JSON.stringify(this.existingAnalysisPhotos));
 
@@ -283,6 +313,8 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   onEditAnalysis(): void {
     const currentIssue = this.issue();
     this.existingAnalysisPhotos = currentIssue?.analysisPhotos ? [...currentIssue.analysisPhotos] : [];
+    this.analysisComplaintType = currentIssue?.complaintType || '';
+    this.otherComplaintType = currentIssue?.otherComplaintType || '';
     this.selectedAnalysisFiles = [];
     this.analysisFilePreviews = [];
     this.isEditingAnalysis = true;
@@ -296,6 +328,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
       this.actionTakenText = currentIssue.actionTaken || '';
       this.preventiveActionText = currentIssue.preventiveAction || '';
       this.analysisComplaintType = currentIssue.complaintType || '';
+      this.otherComplaintType = currentIssue.otherComplaintType || '';
       this.analysisStatus = currentIssue.status || 'OPEN';
       this.existingAnalysisPhotos = currentIssue.analysisPhotos ? [...currentIssue.analysisPhotos] : [];
     }
@@ -307,10 +340,19 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
 
   onQuickTypeChange(newType: string): void {
     const currentIssue = this.issue();
-    if (!currentIssue || !newType || newType === currentIssue.complaintType) return;
+    if (!currentIssue || !newType || (newType === currentIssue.complaintType && newType !== 'Others')) return;
+
+    if (newType === 'Others') {
+      this.isEditingAnalysis = true;
+      this.analysisComplaintType = 'Others';
+      this.otherComplaintType = currentIssue.otherComplaintType || '';
+      this.cdr.markForCheck();
+      return;
+    }
 
     this.savingType.set(true);
     this.analysisComplaintType = newType;
+    this.otherComplaintType = '';
     this.errorMessage.set('');
     this.typeUpdateSuccess.set('');
     this.cdr.markForCheck();
@@ -318,6 +360,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     this.issueService
       .respondToIssue(currentIssue._id, {
         complaintType: newType,
+        otherComplaintType: '',
       })
       .subscribe({
         next: (updatedIssue) => {

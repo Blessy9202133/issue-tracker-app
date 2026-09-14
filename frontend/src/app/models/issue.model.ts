@@ -16,6 +16,7 @@ export interface Issue {
   contract?: string;
   station?: string;
   complaintType?: string;
+  otherComplaintType?: string;
   shed?: string;
   locoNumber?: string;
   locoType?: string;
@@ -45,6 +46,7 @@ export interface CreateIssueDto {
   contract?: string;
   station?: string;
   complaintType?: string;
+  otherComplaintType?: string;
   shed?: string;
   locoNumber?: string;
   locoType?: string;
@@ -66,6 +68,7 @@ export interface RespondIssueDto {
   actionTaken?: string;
   preventiveAction?: string;
   complaintType?: string;
+  otherComplaintType?: string;
   analysisPhotos?: File[];
   existingAnalysisPhotos?: string[];
 }

@@ -51,6 +51,10 @@ const issueSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    otherComplaintType: {
+      type: String,
+      trim: true,
+    },
 
     // Onboard Fields
     shed: {

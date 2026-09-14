@@ -168,7 +168,7 @@
 .issue-table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
+  text-align: center;
 }
 .issue-table th {
   background-color: #f8fafc;
@@ -180,12 +180,16 @@
   letter-spacing: 0.3px;
   border-bottom: 2px solid #cbd5e1;
   white-space: nowrap;
+  text-align: center;
+  vertical-align: middle;
 }
 .issue-table td {
-  padding: 1rem;
+  padding: 0.85rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
   font-size: 0.9rem;
   color: #334155;
+  text-align: center;
+  vertical-align: middle;
 }
 .font-bold { font-weight: 700; color: #0f172a; }
 .col-id, .id-cell {
@@ -202,12 +206,14 @@
   text-overflow: ellipsis;
 }
 .photo-badge {
+  display: inline-block;
   background-color: #eff6ff;
   color: #2563eb;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 .no-photo { color: #94a3b8; }
 .user-cell { font-weight: 500; }
@@ -235,11 +241,13 @@
   flex-wrap: wrap;
 }
 .status-badge {
+  display: inline-block;
   padding: 0.25rem 0.6rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .badge-open { background-color: #fef3c7; color: #92400e; }
 .badge-in-progress { background-color: #dbeafe; color: #1e40af; }

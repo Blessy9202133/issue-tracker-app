@@ -11,7 +11,7 @@
           <p>Correct or update the details entered for this customer complaint</p>
         } @else {
           <h2>Register Customer Complaint</h2>
-          <p>Enter the complaint details reported by the customer</p>
+          <p>Enter the complaint details / suggestions</p>
         }
       </div>
 
@@ -139,7 +139,7 @@
             }
 
             <label for="photos">
-              {{ isEditMode() ? 'Add More Files / Photos' : 'Upload File / Photo' }}
+              {{ isEditMode() ? 'Add More Uploads' : 'Uploads' }}
             </label>
             <input
               type="file"
@@ -206,7 +206,7 @@
       <p class="modal-subtitle">Your complaint has been logged into the system.</p>
 
       <div class="modal-code-box">
-        <span class="modal-code-label">Complaint Code</span>
+        <span class="modal-code-label">Complaint ID</span>
         <strong class="modal-code-value">{{ modalIssueCode() }}</strong>
       </div>
 

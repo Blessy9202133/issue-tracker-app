@@ -75,10 +75,10 @@
             <th class="col-id">ID</th>
             <th>Zone and Location</th>
             <th>Raised On</th>
-            <th>Photos/Files</th>
-            <th>Type of Complaint</th>
+            <th>Attachments</th>
             <th>Status</th>
             <th>Analysed Date</th>
+            <th>Type of Complaint</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -107,13 +107,6 @@
                 }
               </td>
               <td>
-                @if (issue.complaintType) {
-                  <span class="complaint-type-pill">{{ issue.complaintType }}</span>
-                } @else {
-                  <span class="no-data-dash">-</span>
-                }
-              </td>
-              <td>
                 <span class="status-badge" [ngClass]="getStatusClass(issue.status)">
                   {{ getStatusLabel(issue) }}
                 </span>
@@ -121,6 +114,15 @@
               <td>
                 @if (issue.closedDate || (issue.status === 'CLOSED' && issue.updatedAt)) {
                   <span class="closed-date-text">{{ (issue.closedDate || issue.updatedAt) | date: 'medium' }}</span>
+                } @else {
+                  <span class="no-data-dash">-</span>
+                }
+              </td>
+              <td>
+                @if (issue.complaintType) {
+                  <span class="complaint-type-pill" [title]="issue.otherComplaintType || issue.complaintType">
+                    {{ issue.complaintType === 'Others' && issue.otherComplaintType ? 'Others: ' + issue.otherComplaintType : issue.complaintType }}
+                  </span>
                 } @else {
                   <span class="no-data-dash">-</span>
                 }

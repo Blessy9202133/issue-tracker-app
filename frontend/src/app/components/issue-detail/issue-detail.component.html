@@ -139,6 +139,13 @@
             </div>
           </div>
 
+          @if (i.complaintType === 'Others' && i.otherComplaintType) {
+            <div class="analysis-read-item">
+              <span class="analysis-read-label">Specified Complaint Type / Comments:</span>
+              <div class="analysis-read-text">{{ i.otherComplaintType }}</div>
+            </div>
+          }
+
           <div class="analysis-read-item">
             <span class="analysis-read-label">Root Cause:</span>
             <div class="analysis-read-text">{{ i.analysis }}</div>
@@ -205,6 +212,21 @@
             </select>
           </div>
 
+          @if (analysisComplaintType === 'Others') {
+            <div class="form-group other-complaint-box">
+              <label class="form-label" for="otherComplaintType">
+                Specify Type of Complaint / Comments <span class="text-danger">*</span>
+              </label>
+              <textarea
+                id="otherComplaintType"
+                [(ngModel)]="otherComplaintType"
+                rows="2"
+                class="form-textarea"
+                placeholder="Write the type of complaint manually..."
+              ></textarea>
+            </div>
+          }
+
           <!-- Input Holder 1: Root Cause -->
           <div class="form-group">
             <label class="form-label" for="analysisInput">
@@ -222,7 +244,7 @@
           <!-- Input Holder 2: Corrective Action -->
           <div class="form-group">
             <label class="form-label" for="actionTakenInput">
-              Corrective Action
+              Corrective Action <span class="text-danger">*</span>
             </label>
             <textarea
               id="actionTakenInput"
@@ -250,7 +272,7 @@
           <!-- File / Photo Upload for Analysis Team -->
           <div class="form-group">
             <label class="form-label" for="analysisFilesInput">
-              Upload Photos & Files (Analysis Team)
+              Uploads
             </label>
             
             <div class="analysis-upload-container">

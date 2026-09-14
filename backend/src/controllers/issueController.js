@@ -22,6 +22,7 @@ const createIssue = async (req, res) => {
       contract,
       station,
       complaintType,
+      otherComplaintType,
       shed,
       locoNumber,
       locoType,
@@ -52,6 +53,7 @@ const createIssue = async (req, res) => {
       contract,
       station,
       complaintType,
+      otherComplaintType: complaintType === 'Others' ? (otherComplaintType || '') : '',
       shed,
       locoNumber,
       locoType,
@@ -174,7 +176,7 @@ const getIssueById = async (req, res) => {
 // @access  Private
 const respondToIssue = async (req, res) => {
   try {
-    const { comment, targetDate, status, expectedCompletionDate, reassignTo, analysis, actionTaken, preventiveAction, complaintType } = req.body;
+    const { comment, targetDate, status, expectedCompletionDate, reassignTo, analysis, actionTaken, preventiveAction, complaintType, otherComplaintType } = req.body;
 
     const issue = await Issue.findById(req.params.id);
 
@@ -193,6 +195,15 @@ const respondToIssue = async (req, res) => {
     }
     if (complaintType !== undefined) {
       issue.complaintType = complaintType;
+      if (complaintType === 'Others') {
+        if (otherComplaintType !== undefined) {
+          issue.otherComplaintType = otherComplaintType;
+        }
+      } else {
+        issue.otherComplaintType = '';
+      }
+    } else if (otherComplaintType !== undefined) {
+      issue.otherComplaintType = otherComplaintType;
     }
 
     // Handle analysis team uploaded files and photos
