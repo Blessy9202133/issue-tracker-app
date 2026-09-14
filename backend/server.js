@@ -4,9 +4,7 @@ const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
 const { initBackupScheduler } = require('./src/utils/backupScheduler');
-const authRoutes = require('./src/routes/authRoutes');
 const issueRoutes = require('./src/routes/issueRoutes');
-const User = require('./src/models/User');
 
 dotenv.config();
 
@@ -27,7 +25,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth', authRoutes);
 app.use('/api/issues', issueRoutes);
 
 // Health check endpoint

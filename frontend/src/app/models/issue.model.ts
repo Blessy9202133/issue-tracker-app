@@ -1,8 +1,6 @@
-import { User } from './user.model';
-
 export interface Comment {
   _id?: string;
-  user: User;
+  user?: any;
   comment: string;
   targetDate?: string;
   createdAt?: string;
@@ -33,8 +31,8 @@ export interface Issue {
   photos: string[];
   analysisPhotos?: string[];
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
-  createdBy: User;
-  assignedTo: User;
+  createdBy?: any;
+  assignedTo?: any;
   comments: Comment[];
   createdAt: string;
   updatedAt: string;
