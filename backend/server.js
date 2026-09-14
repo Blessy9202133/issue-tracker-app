@@ -3,6 +3,7 @@ const cors = require('cors');
 const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./src/config/db');
+const { initBackupScheduler } = require('./src/utils/backupScheduler');
 const authRoutes = require('./src/routes/authRoutes');
 const issueRoutes = require('./src/routes/issueRoutes');
 const User = require('./src/models/User');
@@ -11,6 +12,9 @@ dotenv.config();
 
 // Connect Database
 connectDB();
+
+// Initialize Automatic Daily MongoDB Backup Scheduler
+initBackupScheduler();
 
 const app = express();
 
