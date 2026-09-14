@@ -34,10 +34,24 @@ const runBackup = async () => {
       } else {
         console.log(`[Automated Backup] Database backup completed via mongodump: ${backupFolder}`);
       }
+      backupUploadsFolder(backupFolder);
     });
 
   } catch (err) {
     console.error("[Automated Backup Error]:", err.message);
+  }
+};
+
+const backupUploadsFolder = (backupFolder) => {
+  try {
+    const uploadsSource = path.join(__dirname, "..", "..", "uploads");
+    const uploadsDest = path.join(backupFolder, "uploads");
+    if (fs.existsSync(uploadsSource)) {
+      fs.cpSync(uploadsSource, uploadsDest, { recursive: true });
+      console.log(`[Automated Backup] Photos & files backed up successfully into: ${uploadsDest}`);
+    }
+  } catch (err) {
+    console.error("[Automated Backup] Photo/File backup error:", err.message);
   }
 };
 
