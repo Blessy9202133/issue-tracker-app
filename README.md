@@ -1,56 +1,31 @@
-# Customer Complaint Portal (CCP)
+# CustomerComplaintPortal
 
-Application for registering, managing, and analyzing railway customer complaints.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 19.0.0.
 
-## Prerequisites
+## Development server
 
-- Node.js (v18 or higher)
-- MongoDB
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Backend Setup
+## Code scaffolding
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Build
 
-3. Create `.env` file in the backend directory:
-   ```env
-   PORT=5000
-   MONGO_URI=mongodb://127.0.0.1:27017/issue_tracker
-   NODE_ENV=production
-   ```
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-4. Start the backend server:
-   ```bash
-   npm start
-   ```
+## Running unit tests
 
-## Frontend Setup
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
+## Running end-to-end tests
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-3. Build for production:
-   ```bash
-   npm run build
-   ```
-   Output files will be generated in `frontend/dist`.
+## Further help
 
-## IIS Deployment
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
 
-1. Copy the contents of `frontend/dist` to the target web directory on the IIS server.
-2. Deploy the `backend` directory to the server and start the backend service (`server.js`).
-3. Ensure the `backend/uploads` folder has write permissions.
+## IIS Deployment Configuration
+
+Download and install URL Rewrite Module from [here](https://www.iis.net/downloads/microsoft/url-rewrite) to apply the URL rules defined in web.config file.
