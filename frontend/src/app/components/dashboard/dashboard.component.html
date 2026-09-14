@@ -2,9 +2,8 @@
   <div class="dashboard-header">
     <div>
       <h2>Customer Complaint Dashboard</h2>
-      <p>Overview of logged Wayside and Onboard customer complaints</p>
+      <p>Overview of logged customer complaints</p>
     </div>
-    <a routerLink="/create-issue" class="btn-create">+ Log New Complaint</a>
   </div>
 
   <!-- Metric Cards -->
@@ -13,13 +12,13 @@
       <div class="metric-value">{{ totalCount() }}</div>
       <div class="metric-label">Total Complaints</div>
     </div>
-    <div class="metric-card metric-open">
-      <div class="metric-value">{{ openCount() }}</div>
-      <div class="metric-label">Open</div>
-    </div>
     <div class="metric-card metric-resolved">
       <div class="metric-value">{{ analysedCount() }}</div>
       <div class="metric-label">Analysed</div>
+    </div>
+    <div class="metric-card metric-open">
+      <div class="metric-value">{{ openCount() }}</div>
+      <div class="metric-label">Yet to Analyze</div>
     </div>
   </div>
 
@@ -39,7 +38,7 @@
       <label>Status</label>
       <select [(ngModel)]="statusFilter" (change)="onFilterChange()" class="filter-control">
         <option value="">All Statuses</option>
-        <option value="OPEN">Open</option>
+        <option value="OPEN">Yet to Analyze</option>
         <option value="ANALYSED">Analysed</option>
       </select>
     </div>
@@ -67,29 +66,31 @@
       <div class="empty-state">
         <span class="empty-icon">📂</span>
         <h3>No complaints found</h3>
-        <p>Try adjusting your search filters or log a new complaint.</p>
+        <p>Try adjusting your search filters.</p>
       </div>
     } @else {
       <table class="issue-table">
         <thead>
           <tr>
-            <th>Code</th>
-            <th>Zone & Location</th>
-            <th>Raised Date</th>
-            <th>Closed Date</th>
-            <th>Photos / Files</th>
+            <th class="col-id">ID</th>
+            <th>Zone and Location</th>
+            <th>Raised On</th>
+            <th>Photos/Files</th>
             <th>Type of Complaint</th>
             <th>Status</th>
+            <th>Analysed Date</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
           @for (issue of issues(); track issue._id) {
             <tr>
-              <td class="font-bold">{{ issue.issueCode }}</td>
+              <td class="id-cell font-bold">{{ issue.issueCode }}</td>
               <td>
                 <div class="zone-tag">{{ issue.zone }}</div>
-                <div class="sub-location">Div: {{ issue.contract || 'N/A' }}</div>
+                @if (issue.contract) {
+                  <div class="sub-location">Div: {{ issue.contract }}</div>
+                }
                 @if (issue.station) {
                   <div class="type-sub">Stn: {{ issue.station }}</div>
                 }
@@ -98,13 +99,6 @@
                 }
               </td>
               <td>{{ issue.issueRaisedDate | date: 'medium' }}</td>
-              <td>
-                @if (issue.closedDate || (issue.status === 'CLOSED' && issue.updatedAt)) {
-                  <span class="closed-date-text">{{ (issue.closedDate || issue.updatedAt) | date: 'medium' }}</span>
-                } @else {
-                  <span class="no-data-dash">-</span>
-                }
-              </td>
               <td>
                 @if (issue.photos && issue.photos.length > 0) {
                   <span class="photo-badge">📎 {{ issue.photos.length }}</span>
@@ -125,9 +119,16 @@
                 </span>
               </td>
               <td>
-                @if (issue.status === 'CLOSED') {
+                @if (issue.closedDate || (issue.status === 'CLOSED' && issue.updatedAt)) {
+                  <span class="closed-date-text">{{ (issue.closedDate || issue.updatedAt) | date: 'medium' }}</span>
+                } @else {
+                  <span class="no-data-dash">-</span>
+                }
+              </td>
+              <td>
+                @if (issue.status === 'CLOSED' || issue.status === 'RESOLVED' || issue.analysis) {
                   <a [routerLink]="['/issues', issue._id]" class="btn-action btn-view-only">
-                    View
+                    View / Edit
                   </a>
                 } @else {
                   <a [routerLink]="['/issues', issue._id]" class="btn-action btn-respond">

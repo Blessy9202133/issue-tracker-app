@@ -28,11 +28,6 @@
         <span class="issue-code">{{ i.issueCode }}</span>
 
         <div class="status-action-wrap">
-          @if (i.status !== 'CLOSED') {
-            <a [routerLink]="['/create-issue']" [queryParams]="{ id: i._id }" class="btn-edit-complaint" title="Edit complaint details">
-              ✏️ Edit Complaint
-            </a>
-          }
           <span class="status-badge" [ngClass]="getStatusClass(i.status)">
             {{ getStatusLabel(i) }}
           </span>
@@ -145,14 +140,21 @@
           </div>
 
           <div class="analysis-read-item">
-            <span class="analysis-read-label">Root Cause / Technical Analysis:</span>
+            <span class="analysis-read-label">Root Cause:</span>
             <div class="analysis-read-text">{{ i.analysis }}</div>
           </div>
 
           @if (i.actionTaken) {
             <div class="analysis-read-item">
-              <span class="analysis-read-label">Action Taken / Corrective Action:</span>
+              <span class="analysis-read-label">Corrective Action:</span>
               <div class="analysis-read-text">{{ i.actionTaken }}</div>
+            </div>
+          }
+
+          @if (i.preventiveAction) {
+            <div class="analysis-read-item">
+              <span class="analysis-read-label">Preventive Action:</span>
+              <div class="analysis-read-text">{{ i.preventiveAction }}</div>
             </div>
           }
 
@@ -203,9 +205,10 @@
             </select>
           </div>
 
+          <!-- Input Holder 1: Root Cause -->
           <div class="form-group">
             <label class="form-label" for="analysisInput">
-              Root Cause / Technical Analysis <span class="text-danger">*</span>
+              Root Cause <span class="text-danger">*</span>
             </label>
             <textarea
               id="analysisInput"
@@ -216,16 +219,31 @@
             ></textarea>
           </div>
 
+          <!-- Input Holder 2: Corrective Action -->
           <div class="form-group">
             <label class="form-label" for="actionTakenInput">
-              Action Taken / Corrective Action
+              Corrective Action
             </label>
             <textarea
               id="actionTakenInput"
               [(ngModel)]="actionTakenText"
-              rows="2"
+              rows="3"
               class="form-textarea"
               placeholder="Describe corrective actions performed, parts serviced/replaced, checks carried out..."
+            ></textarea>
+          </div>
+
+          <!-- Input Holder 3: Preventive Action -->
+          <div class="form-group">
+            <label class="form-label" for="preventiveActionInput">
+              Preventive Action
+            </label>
+            <textarea
+              id="preventiveActionInput"
+              [(ngModel)]="preventiveActionText"
+              rows="3"
+              class="form-textarea"
+              placeholder="Describe preventive measures and precautions to avoid recurrence of this complaint..."
             ></textarea>
           </div>
 
@@ -335,3 +353,19 @@
     </div>
   }
 </div>
+
+@if (showAnalysisModal()) {
+  <div class="modal-overlay" (click)="closeAnalysisModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h3 class="modal-title">Submitted Successfully</h3>
+      <p class="modal-subtitle">Analysis & files submitted successfully and complaint is now Closed.</p>
+
+      <button type="button" class="modal-btn-ok" (click)="closeAnalysisModal()">OK</button>
+    </div>
+  </div>
+}

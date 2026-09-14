@@ -174,7 +174,7 @@ const getIssueById = async (req, res) => {
 // @access  Private
 const respondToIssue = async (req, res) => {
   try {
-    const { comment, targetDate, status, expectedCompletionDate, reassignTo, analysis, actionTaken, complaintType } = req.body;
+    const { comment, targetDate, status, expectedCompletionDate, reassignTo, analysis, actionTaken, preventiveAction, complaintType } = req.body;
 
     const issue = await Issue.findById(req.params.id);
 
@@ -187,6 +187,9 @@ const respondToIssue = async (req, res) => {
     }
     if (actionTaken !== undefined) {
       issue.actionTaken = actionTaken;
+    }
+    if (preventiveAction !== undefined) {
+      issue.preventiveAction = preventiveAction;
     }
     if (complaintType !== undefined) {
       issue.complaintType = complaintType;
@@ -223,11 +226,10 @@ const respondToIssue = async (req, res) => {
 
     if (status) {
       issue.status = status;
-      if (status === 'CLOSED') {
-        issue.closedDate = issue.closedDate || new Date();
-      } else {
-        issue.closedDate = null;
-      }
+    }
+
+    if (issue.status === 'CLOSED' || issue.status === 'RESOLVED' || analysis !== undefined) {
+      issue.closedDate = new Date();
     }
 
     if (expectedCompletionDate) {

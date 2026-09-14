@@ -118,6 +118,6 @@ export class DashboardComponent implements OnInit {
     if (issue.status === 'CLOSED' || issue.status === 'RESOLVED' || issue.analysis) {
       return 'ANALYSED';
     }
-    return issue.status || 'OPEN';
+    return 'YET TO ANALYZE';
   }
 }

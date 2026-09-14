@@ -102,6 +102,10 @@ const issueSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    preventiveAction: {
+      type: String,
+      trim: true,
+    },
     photos: [
       {
         type: String,
@@ -140,22 +144,22 @@ issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ zone: 1 });
 issueSchema.index({ complaintCategory: 1 });
 
-// Auto generate issueCode before saving in YYMMDD-01 format (where sequence is count in that month)
+// Auto generate issueCode before saving in MMYYDD-01 format (mmyydate-01, sequence is monthly count)
 issueSchema.pre('save', async function (next) {
   if (!this.issueCode) {
     const now = this.issueRaisedDate ? new Date(this.issueRaisedDate) : new Date();
-    const year = String(now.getFullYear()).slice(-2);
     const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2);
     const day = String(now.getDate()).padStart(2, '0');
-    const monthKey = `${year}${month}`;
-    const dateKey = `${year}${month}${day}`;
+    const monthKey = `${month}${year}`;
+    const mmyydate = `${month}${year}${day}`;
 
     const count = await mongoose.model('Issue').countDocuments({
       issueCode: { $regex: `^${monthKey}` },
     });
 
     const sequence = String(count + 1).padStart(2, '0');
-    this.issueCode = `${dateKey}-${sequence}`;
+    this.issueCode = `${mmyydate}-${sequence}`;
   }
   next();
 });

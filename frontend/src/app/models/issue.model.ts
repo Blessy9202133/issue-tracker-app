@@ -28,6 +28,7 @@ export interface Issue {
   expectedCompletionDate?: string;
   analysis?: string;
   actionTaken?: string;
+  preventiveAction?: string;
   photos: string[];
   analysisPhotos?: string[];
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
@@ -63,6 +64,7 @@ export interface RespondIssueDto {
   reassignTo?: string;
   analysis?: string;
   actionTaken?: string;
+  preventiveAction?: string;
   complaintType?: string;
   analysisPhotos?: File[];
   existingAnalysisPhotos?: string[];

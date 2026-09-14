@@ -162,7 +162,7 @@
   background: white;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
-  overflow: hidden;
+  overflow-x: auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 .issue-table {
@@ -172,12 +172,14 @@
 }
 .issue-table th {
   background-color: #f8fafc;
-  padding: 0.85rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #475569;
+  padding: 0.85rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0f172a;
   text-transform: uppercase;
-  border-bottom: 1px solid #e2e8f0;
+  letter-spacing: 0.3px;
+  border-bottom: 2px solid #cbd5e1;
+  white-space: nowrap;
 }
 .issue-table td {
   padding: 1rem;
@@ -186,6 +188,10 @@
   color: #334155;
 }
 .font-bold { font-weight: 700; color: #0f172a; }
+.col-id, .id-cell {
+  white-space: nowrap;
+  min-width: 135px;
+}
 .zone-tag { font-weight: 600; color: #1e293b; }
 .sub-location { font-size: 0.825rem; color: #475569; font-weight: 500; }
 .type-sub { font-size: 0.75rem; color: #64748b; }

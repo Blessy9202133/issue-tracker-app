@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IssueService } from '../../services/issue.service';
 import { Issue } from '../../models/issue.model';
@@ -21,6 +21,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   successMessage = signal<string>('');
   submitting = signal<boolean>(false);
   closing = signal<boolean>(false);
+  showAnalysisModal = signal<boolean>(false);
 
   // Form / Analysis Fields
   comment = '';
@@ -28,6 +29,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' = 'IN_PROGRESS';
   analysisText = '';
   actionTakenText = '';
+  preventiveActionText = '';
   analysisComplaintType = '';
   analysisStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED' = 'OPEN';
   isEditingAnalysis = false;
@@ -43,6 +45,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   complaintTypes = ['NMS', 'Application Related', 'Others'];
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private issueService = inject(IssueService);
   private cdr = inject(ChangeDetectorRef);
   private routeSub: Subscription | null = null;
@@ -78,6 +81,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
           this.status = issueData.status || 'OPEN';
           this.analysisText = issueData.analysis || '';
           this.actionTakenText = issueData.actionTaken || '';
+          this.preventiveActionText = issueData.preventiveAction || '';
           this.analysisComplaintType = issueData.complaintType || '';
           this.analysisStatus = issueData.status || 'OPEN';
           this.isEditingAnalysis = !issueData.analysis;
@@ -238,6 +242,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     const formData = new FormData();
     formData.append('analysis', this.analysisText.trim());
     formData.append('actionTaken', this.actionTakenText.trim());
+    formData.append('preventiveAction', this.preventiveActionText.trim());
     formData.append('complaintType', this.analysisComplaintType);
     formData.append('status', 'CLOSED');
     formData.append('existingAnalysisPhotos', JSON.stringify(this.existingAnalysisPhotos));
@@ -257,7 +262,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
           this.selectedAnalysisFiles = [];
           this.analysisFilePreviews = [];
           this.existingAnalysisPhotos = updatedIssue.analysisPhotos ? [...updatedIssue.analysisPhotos] : [];
-          this.successMessage.set('Analysis & files submitted successfully and complaint is now Closed.');
+          this.showAnalysisModal.set(true);
           this.cdr.markForCheck();
           this.cdr.detectChanges();
         },
@@ -268,6 +273,11 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
       });
+  }
+
+  closeAnalysisModal(): void {
+    this.showAnalysisModal.set(false);
+    this.router.navigate(['/dashboard']);
   }
 
   onEditAnalysis(): void {
@@ -284,6 +294,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     if (currentIssue) {
       this.analysisText = currentIssue.analysis || '';
       this.actionTakenText = currentIssue.actionTaken || '';
+      this.preventiveActionText = currentIssue.preventiveAction || '';
       this.analysisComplaintType = currentIssue.complaintType || '';
       this.analysisStatus = currentIssue.status || 'OPEN';
       this.existingAnalysisPhotos = currentIssue.analysisPhotos ? [...currentIssue.analysisPhotos] : [];
@@ -350,7 +361,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     if (issue.status === 'CLOSED' || issue.status === 'RESOLVED' || issue.analysis) {
       return 'ANALYSED';
     }
-    return issue.status || 'OPEN';
+    return 'YET TO ANALYZE';
   }
 
   getStatusClass(status: string): string {

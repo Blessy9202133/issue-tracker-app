@@ -32,6 +32,8 @@ export class CreateIssueComponent implements OnInit {
   submitting = signal<boolean>(false);
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
+  showModal = signal<boolean>(false);
+  modalIssueCode = signal<string>('');
 
   zones = [
     'Central Railway',
@@ -252,14 +254,23 @@ export class CreateIssueComponent implements OnInit {
       this.issueService.createIssue(formData).subscribe({
         next: (createdIssue) => {
           this.submitting.set(false);
-          this.successMessage.set(`Complaint ${createdIssue.issueCode} logged successfully! Redirecting to dashboard...`);
+          this.modalIssueCode.set(createdIssue.issueCode || '');
+          this.showModal.set(true);
+          this.successMessage.set('');
           this.errorMessage.set('');
+          this.zone = '';
+          this.contract = '';
+          this.station = '';
+          this.locoNumber = '';
+          this.details = '';
+          this.selectedFiles = [];
+          this.filePreviews = [];
           this.cdr.markForCheck();
           this.cdr.detectChanges();
-
-          setTimeout(() => {
-            this.router.navigate(['/dashboard']);
-          }, 400);
+          const fileInput = document.getElementById('photos') as HTMLInputElement | null;
+          if (fileInput) {
+            fileInput.value = '';
+          }
         },
         error: (err) => {
           this.submitting.set(false);
@@ -269,5 +280,11 @@ export class CreateIssueComponent implements OnInit {
         },
       });
     }
+  }
+
+  closeModal(): void {
+    this.showModal.set(false);
+    this.modalIssueCode.set('');
+    this.cdr.markForCheck();
   }
 }

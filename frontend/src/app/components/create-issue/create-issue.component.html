@@ -82,22 +82,6 @@
 
         <!-- ==================== COMMON FIELDS ==================== -->
         <div class="common-section">
-          <!-- Raised Date & Initial Assignee -->
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="issueRaisedDate">Complaint Raised Date & Time (Auto-captured)</label>
-              <input
-                type="text"
-                id="issueRaisedDate"
-                name="issueRaisedDate"
-                [value]="issueRaisedDateDisplay()"
-                class="form-control readonly-input"
-                readonly
-                disabled
-              />
-            </div>
-          </div>
-
           <!-- Complaint Description -->
           <div class="form-group">
             <div class="field-header-row">
@@ -113,7 +97,7 @@
             <textarea
               id="details"
               name="details"
-              rows="6"
+              rows="4"
               [(ngModel)]="details"
               placeholder="Describe the complaint, defect, or failure details (up to 1,000 words)..."
               class="form-control"
@@ -155,7 +139,7 @@
             }
 
             <label for="photos">
-              {{ isEditMode() ? 'Add More Files / Photos' : 'File / Photo Upload' }}
+              {{ isEditMode() ? 'Add More Files / Photos' : 'Upload File / Photo' }}
             </label>
             <input
               type="file"
@@ -209,3 +193,24 @@
     </div>
   }
 </div>
+
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h3 class="modal-title">Complaint Registered Successfully</h3>
+      <p class="modal-subtitle">Your complaint has been logged into the system.</p>
+
+      <div class="modal-code-box">
+        <span class="modal-code-label">Complaint Code</span>
+        <strong class="modal-code-value">{{ modalIssueCode() }}</strong>
+      </div>
+
+      <button type="button" class="modal-btn-ok" (click)="closeModal()">OK</button>
+    </div>
+  </div>
+}
