@@ -345,16 +345,22 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     return path.split('/').pop()?.split('\\').pop() || 'File';
   }
 
+  getStatusLabel(issue: Issue | null): string {
+    if (!issue) return '';
+    if (issue.status === 'CLOSED' || issue.status === 'RESOLVED' || issue.analysis) {
+      return 'ANALYSED';
+    }
+    return issue.status || 'OPEN';
+  }
+
   getStatusClass(status: string): string {
     switch (status) {
       case 'OPEN':
         return 'badge-open';
-      case 'IN_PROGRESS':
-        return 'badge-in-progress';
+      case 'ANALYSED':
       case 'RESOLVED':
-        return 'badge-resolved';
       case 'CLOSED':
-        return 'badge-closed';
+        return 'badge-resolved';
       default:
         return '';
     }

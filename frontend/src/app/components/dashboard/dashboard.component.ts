@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit {
   zoneFilter = '';
   shedFilter = '';
 
-  complaintTypes = ['Wayside', 'Onboard Side', 'NMS', 'Hardware', 'Other'];
+  complaintTypes = ['NMS', 'Application Related', 'Others'];
 
   // Computed metrics from reactive signal
   totalCount = computed(() => this.issues().length);
@@ -105,14 +105,19 @@ export class DashboardComponent implements OnInit {
     switch (status) {
       case 'OPEN':
         return 'badge-open';
-      case 'IN_PROGRESS':
-        return 'badge-in-progress';
+      case 'ANALYSED':
       case 'RESOLVED':
-        return 'badge-resolved';
       case 'CLOSED':
-        return 'badge-closed';
+        return 'badge-resolved';
       default:
         return '';
     }
+  }
+
+  getStatusLabel(issue: Issue): string {
+    if (issue.status === 'CLOSED' || issue.status === 'RESOLVED' || issue.analysis) {
+      return 'ANALYSED';
+    }
+    return issue.status || 'OPEN';
   }
 }

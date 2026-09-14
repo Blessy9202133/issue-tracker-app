@@ -92,7 +92,11 @@ const getIssues = async (req, res) => {
     let query = {};
 
     if (status) {
-      query.status = status;
+      if (status === 'ANALYSED') {
+        query.$or = [{ status: { $in: ['RESOLVED', 'CLOSED'] } }, { analysis: { $exists: true, $ne: '' } }];
+      } else {
+        query.status = status;
+      }
     }
     if (complaintType) {
       query.complaintType = complaintType;

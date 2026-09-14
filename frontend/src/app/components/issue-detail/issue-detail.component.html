@@ -34,7 +34,7 @@
             </a>
           }
           <span class="status-badge" [ngClass]="getStatusClass(i.status)">
-            {{ i.status }}
+            {{ getStatusLabel(i) }}
           </span>
         </div>
       </div>
@@ -180,7 +180,7 @@
           <div class="analysis-status-pill-row">
             <span class="meta-label">Current Ticket Status:</span>
             <span class="status-badge" [ngClass]="getStatusClass(i.status)">
-              {{ i.status }}
+              {{ getStatusLabel(i) }}
             </span>
           </div>
         </div>
