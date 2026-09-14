@@ -191,15 +191,6 @@ const respondToIssue = async (req, res) => {
     }
     issue.analysisPhotos = updatedAnalysisPhotos;
 
-    let reassigned = false;
-    let newAssigneeUser = null;
-
-    if (reassignTo && reassignTo.toString() !== issue.assignedTo.toString()) {
-      issue.assignedTo = reassignTo;
-      reassigned = true;
-      newAssigneeUser = await User.findById(reassignTo);
-    }
-
     if (status) {
       issue.status = status;
     }
@@ -212,15 +203,9 @@ const respondToIssue = async (req, res) => {
       issue.expectedCompletionDate = expectedCompletionDate;
     }
 
-    if (comment || reassigned) {
-      const commentText = comment
-        ? (reassigned ? `[Re-assigned to ${newAssigneeUser?.name} (${newAssigneeUser?.role})] - ${comment}` : comment)
-        : `Re-assigned complaint to ${newAssigneeUser?.name} (${newAssigneeUser?.role})`;
-
-      const effectiveUser = await getEffectiveUser(req);
+    if (comment) {
       issue.comments.push({
-        user: effectiveUser?._id,
-        comment: commentText,
+        comment,
         targetDate: targetDate || expectedCompletionDate,
       });
     }

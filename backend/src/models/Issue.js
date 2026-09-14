@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 const commentSchema = new mongoose.Schema(
   {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: false,
-    },
     comment: {
       type: String,
       required: true,
@@ -125,16 +120,6 @@ const issueSchema = new mongoose.Schema(
       enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'],
       default: 'OPEN',
     },
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: false,
-    },
-    assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: false,
-    },
     comments: [commentSchema],
   },
   {
@@ -144,7 +129,6 @@ const issueSchema = new mongoose.Schema(
 
 // Indexes for ultra-fast query performance
 issueSchema.index({ status: 1 });
-issueSchema.index({ assignedTo: 1 });
 issueSchema.index({ zone: 1 });
 issueSchema.index({ complaintCategory: 1 });
 
