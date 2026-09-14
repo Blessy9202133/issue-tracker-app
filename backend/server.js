@@ -35,53 +35,6 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Customer Complaint Portal API is running smoothly' });
 });
 
-// Seed default users if empty
-const seedUsers = async () => {
-  try {
-    const userCount = await User.countDocuments();
-    if (userCount === 0) {
-      console.log('Seeding initial HBL Portal users...');
-      await User.create([
-        {
-          name: 'Sushma',
-          email: 'sushma.onapakala@hbl.com',
-          username: 'sushma',
-          phoneNumber: '9876543210',
-          department: 'Customer Desk',
-          password: 'password123',
-          role: 'Customer',
-        },
-        {
-          name: 'jahnavi',
-          email: 'sushmaonapakala@hbl.com',
-          username: 'jahnavi',
-          phoneNumber: '9876543211',
-          department: 'HBL Software Dept',
-          password: 'password123',
-          role: 'hbl_emp',
-        },
-        {
-          name: 'prabhakar',
-          email: 'admin@hbl.com',
-          username: 'prabhakar',
-          phoneNumber: '9876543212',
-          department: 'HBL Management',
-          password: 'password123',
-          role: 'admin',
-        },
-      ]);
-      console.log('HBL Portal users seeded:');
-      console.log(' - Sushma (Customer)');
-      console.log(' - jahnavi (hbl_emp)');
-      console.log(' - prabhakar (admin)');
-    }
-  } catch (err) {
-    console.error('Error seeding users:', err.message);
-  }
-};
-
-seedUsers();
-
 const PORT = process.env.PORT || 5000;
 
 // Explicitly listen on 0.0.0.0 to support both IPv4 and IPv6 instant connections
