@@ -1,15 +1,5 @@
 const mongoose = require('mongoose');
 const Issue = require('../models/Issue');
-const User = require('../models/User');
-const { sendIssueAssignmentEmail } = require('../config/mailer');
-
-const getEffectiveUser = async (req) => {
-  if (req.user && req.user._id) return req.user;
-  let user = await User.findOne({ role: 'admin' });
-  if (!user) user = await User.findOne();
-  return user;
-};
-
 
 // @desc    Create a new customer complaint
 // @route   POST /api/issues
@@ -31,15 +21,11 @@ const createIssue = async (req, res) => {
       poLoaNumber,
       details,
       issueRaisedDate,
-      assignedTo,
     } = req.body;
 
     if (!zone || !details) {
       return res.status(400).json({ message: 'Zone and Complaint description are required' });
     }
-
-    const effectiveUser = await getEffectiveUser(req);
-    const targetAssigneeId = assignedTo || effectiveUser?._id;
 
     // Process uploaded photo paths
     let photos = [];
@@ -63,22 +49,11 @@ const createIssue = async (req, res) => {
       details,
       issueRaisedDate: issueRaisedDate || Date.now(),
       photos,
-      assignedTo: targetAssigneeId,
-      createdBy: effectiveUser?._id,
       status: 'OPEN',
     };
 
     const issue = await Issue.create(issueData);
-
-    const populatedIssue = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email department role')
-      .populate('assignedTo', 'name email department role');
-
-    if (populatedIssue.assignedTo && populatedIssue.assignedTo.email) {
-      sendIssueAssignmentEmail(populatedIssue, populatedIssue.assignedTo);
-    }
-
-    res.status(201).json(populatedIssue);
+    res.status(201).json(issue);
   } catch (error) {
     console.error('Error creating complaint:', error);
     res.status(500).json({ message: error.message });
@@ -90,7 +65,7 @@ const createIssue = async (req, res) => {
 // @access  Private
 const getIssues = async (req, res) => {
   try {
-    const { status, zone, shed, complaintCategory, assignedToMe, complaintType } = req.query;
+    const { status, zone, shed, complaintCategory, complaintType } = req.query;
     let query = {};
 
     if (status) {
@@ -112,14 +87,8 @@ const getIssues = async (req, res) => {
     if (shed) {
       query.shed = { $regex: shed, $options: 'i' };
     }
-    if (assignedToMe === 'true' && req.user && req.user._id) {
-      query.assignedTo = req.user._id;
-    }
 
     const issues = await Issue.find(query)
-      .populate('createdBy', 'name email department role')
-      .populate('assignedTo', 'name email department role')
-      .populate('comments.user', 'name email department role')
       .sort({ createdAt: -1 })
       .lean();
 
@@ -150,11 +119,7 @@ const getIssueById = async (req, res) => {
       query.issueCode = paramId.toUpperCase();
     }
 
-    const issue = await Issue.findOne(query)
-      .populate('createdBy', 'name email department role')
-      .populate('assignedTo', 'name email department role')
-      .populate('comments.user', 'name email role department')
-      .lean();
+    const issue = await Issue.findOne(query).lean();
 
     if (!issue) {
       return res.status(404).json({ message: 'Complaint not found' });
@@ -261,16 +226,7 @@ const respondToIssue = async (req, res) => {
     }
 
     await issue.save();
-
-    const updatedIssue = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email department role')
-      .populate('assignedTo', 'name email department role')
-      .populate('comments.user', 'name email role department');
-
-    if (reassigned && newAssigneeUser && newAssigneeUser.email) {
-      sendIssueAssignmentEmail(updatedIssue, newAssigneeUser);
-    }
-
+    const updatedIssue = await Issue.findById(issue._id);
     res.json(updatedIssue);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -316,12 +272,7 @@ const updateIssue = async (req, res) => {
     issue.photos = updatedPhotos;
 
     await issue.save();
-
-    const updated = await Issue.findById(issue._id)
-      .populate('createdBy', 'name email department role')
-      .populate('assignedTo', 'name email department role')
-      .populate('comments.user', 'name email role department');
-
+    const updated = await Issue.findById(issue._id);
     res.json(updated);
   } catch (error) {
     res.status(500).json({ message: error.message });
