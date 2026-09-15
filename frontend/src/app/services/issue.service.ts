@@ -7,20 +7,7 @@ import { Issue, RespondIssueDto } from '../models/issue.model';
   providedIn: 'root',
 })
 export class IssueService {
-  private get apiUrl(): string {
-    if (typeof window !== 'undefined' && (window as any)['API_URL']) {
-      return (window as any)['API_URL'];
-    }
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://127.0.0.1:5000/api/issues';
-      }
-      // Production fallback to HTTP backend port 5000
-      return `http://${hostname}:5000/api/issues`;
-    }
-    return 'api/issues';
-  }
+  private apiUrl = 'http://127.0.0.1:5000/api/issues';
 
   constructor(private http: HttpClient) {}
 
