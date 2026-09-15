@@ -7,7 +7,19 @@ import { Issue, RespondIssueDto } from '../models/issue.model';
   providedIn: 'root',
 })
 export class IssueService {
-  private apiUrl = 'http://127.0.0.1:5000/api/issues';
+  private get apiUrl(): string {
+    if (typeof window !== 'undefined' && (window as any)['API_URL']) {
+      return (window as any)['API_URL'];
+    }
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://127.0.0.1:5000/api/issues';
+      }
+    }
+    // Connect to server IP 10.10.28.35 port 5000 for network client PCs
+    return 'http://10.10.28.35:5000/api/issues';
+  }
 
   constructor(private http: HttpClient) {}
 
