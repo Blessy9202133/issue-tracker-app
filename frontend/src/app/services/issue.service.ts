@@ -17,8 +17,8 @@ export class IssueService {
         return 'http://127.0.0.1:5000/api/issues';
       }
     }
-    // Direct connection to backend server IP on port 5000 (matching WFMS architecture)
-    return 'http://10.10.28.35:5000/api/issues';
+    // Production HTTPS Port 443 endpoint via IIS Rewrite Rule
+    return 'api/issues';
   }
 
   constructor(private http: HttpClient) {}
