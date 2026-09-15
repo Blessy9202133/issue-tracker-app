@@ -87,7 +87,7 @@ export class DashboardComponent implements OnInit {
           console.error('Error loading complaints on dashboard:', err);
           this.loading.set(false);
           if (err.status === 0) {
-            this.errorMessage.set('Backend API server on http://127.0.0.1:5000 is not running. Please start the backend using: cd backend && npm run dev');
+            this.errorMessage.set('Unable to connect to the backend server. Please verify the backend service is running.');
           } else {
             this.errorMessage.set(err.error?.message || 'Failed to load complaints from server.');
           }
