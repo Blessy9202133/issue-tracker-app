@@ -17,8 +17,8 @@ export class IssueService {
         return 'http://127.0.0.1:5000/api/issues';
       }
     }
-    // Direct interlink from IIS Frontend to standalone Node.js Backend on server IP 10.10.28.35
-    return 'http://10.10.28.35:5000/api/issues';
+    // Relative API endpoint for IIS proxy (avoids Mixed Content & Firewall port blocks)
+    return 'api/issues';
   }
 
   constructor(private http: HttpClient) {}
