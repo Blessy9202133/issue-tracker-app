@@ -17,8 +17,8 @@ export class IssueService {
         return 'http://127.0.0.1:5000/api/issues';
       }
     }
-    // Production HTTPS Port 4915 endpoint
-    return 'https://eg.hbl.in:4915/api/issues';
+    // Production HTTPS Port 443 IIS Rewrite endpoint
+    return '/ccp/api/issues';
   }
 
   constructor(private http: HttpClient) {}
