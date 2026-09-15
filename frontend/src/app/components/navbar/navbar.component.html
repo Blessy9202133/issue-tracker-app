@@ -6,7 +6,9 @@
     </a>
 
     <div class="nav-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">Back to Main Page</a>
+      @if (!isMainPage()) {
+        <a routerLink="/" class="nav-item">Back to Main Page</a>
+      }
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
     </div>
   </div>
