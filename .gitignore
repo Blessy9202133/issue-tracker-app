@@ -12,6 +12,11 @@ frontend/.angular/
 backend/uploads/*
 !backend/uploads/.gitkeep
 
+# Archive files
+*.zip
+*.rar
+*.tar.gz
+
 # Operating system files
 .DS_Store
 Thumbs.db
