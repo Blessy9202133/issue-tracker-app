@@ -16,6 +16,8 @@ export class IssueService {
       if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return 'http://127.0.0.1:5000/api/issues';
       }
+      // Production fallback to server port 5000 if not proxied
+      return `${window.location.protocol}//${hostname}:5000/api/issues`;
     }
     return 'api/issues';
   }
