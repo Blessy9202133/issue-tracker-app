@@ -4,13 +4,13 @@ import { CreateIssueComponent } from './components/create-issue/create-issue.com
 import { IssueDetailComponent } from './components/issue-detail/issue-detail.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'create-issue', pathMatch: 'full' },
+  { path: '', component: CreateIssueComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'create-issue', component: CreateIssueComponent },
   { path: 'create-issue/:id', component: CreateIssueComponent },
   { path: 'issues/:id', component: IssueDetailComponent },
-  { path: 'login', redirectTo: 'create-issue', pathMatch: 'full' },
-  { path: 'register', redirectTo: 'create-issue', pathMatch: 'full' },
-  { path: '**', redirectTo: 'create-issue' },
+  { path: 'login', redirectTo: '', pathMatch: 'full' },
+  { path: 'register', redirectTo: '', pathMatch: 'full' },
+  { path: '**', redirectTo: '' },
 ];
 
