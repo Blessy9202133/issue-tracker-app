@@ -34,7 +34,7 @@ app.get('/api/health', (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Explicitly listen on 0.0.0.0 to support both IPv4 and IPv6 instant connections
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Customer Complaint Portal API running on http://127.0.0.1:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Customer Complaint Portal API running on port ${PORT}`);
 });
+

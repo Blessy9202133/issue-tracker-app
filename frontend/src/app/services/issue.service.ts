@@ -17,8 +17,8 @@ export class IssueService {
         return 'http://127.0.0.1:5000/api/issues';
       }
     }
-    // Production HTTPS Port 443 endpoint via IIS Rewrite Rule (No extra firewall port)
-    return '/ccp/api/issues';
+    // Production HTTPS Port 443 IIS Application endpoint (ccp-api)
+    return '/ccp-api/api/issues';
   }
 
   constructor(private http: HttpClient) {}
