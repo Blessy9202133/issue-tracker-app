@@ -43,7 +43,7 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
   analysisFilePreviews: { name: string; isImage: boolean; previewUrl?: string }[] = [];
   existingAnalysisPhotos: string[] = [];
 
-  complaintTypes = ['NMS', 'Application Related', 'Others'];
+  complaintTypes = ['Application Data', 'Loco Kavach Maintenance Issue','Stationary Kavach Maintenance Issue','Kavach Software Issue','Inter-Operability Issue','RFID Tag Issue','Other Kavach OEM Issue','Railway Issue', 'Others']; 
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
@@ -383,10 +383,25 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
       });
   }
 
+  onComplaintTypeChange(newType: string): void {
+    this.analysisComplaintType = newType;
+    if (newType !== 'Others') {
+      this.otherComplaintType = '';
+    }
+    this.cdr.markForCheck();
+    this.cdr.detectChanges();
+  }
+
   getImageUrl(path: string): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    return `http://127.0.0.1:5000${path}`;
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return `http://127.0.0.1:4915${path}`;
+      }
+    }
+    return path;
   }
 
   isImage(path: string): boolean {

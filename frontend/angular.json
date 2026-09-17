@@ -21,7 +21,7 @@
               "base": "dist",
               "browser": ""
             },
-            "baseHref": "/ccp/",
+            "baseHref": "/KavachComplaintPortal/",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [

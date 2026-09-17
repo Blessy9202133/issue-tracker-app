@@ -101,7 +101,7 @@
     <div class="box-card analysis-box">
       <div class="card-header-row">
         <div class="card-title-group">
-          <h3 class="card-title">🔬 Technical Analysis & Action Taken</h3>
+          <h3 class="card-title">🔬 Technical Analysis & Corrective Action</h3>
           <span class="card-subtitle">Investigation findings, root cause analysis, and corrective measures</span>
         </div>
 
@@ -203,6 +203,7 @@
             <select
               id="complaintTypeSelect"
               [(ngModel)]="analysisComplaintType"
+              (ngModelChange)="onComplaintTypeChange($event)"
               class="form-select-full"
             >
               <option value="">-- Select Type of Complaint --</option>
@@ -252,20 +253,6 @@
               rows="3"
               class="form-textarea"
               placeholder="Describe corrective actions performed, parts serviced/replaced, checks carried out..."
-            ></textarea>
-          </div>
-
-          <!-- Input Holder 3: Preventive Action -->
-          <div class="form-group">
-            <label class="form-label" for="preventiveActionInput">
-              Preventive Action
-            </label>
-            <textarea
-              id="preventiveActionInput"
-              [(ngModel)]="preventiveActionText"
-              rows="3"
-              class="form-textarea"
-              placeholder="Describe preventive measures and precautions to avoid recurrence of this complaint..."
             ></textarea>
           </div>
 

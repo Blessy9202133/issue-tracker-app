@@ -11,14 +11,8 @@ export class IssueService {
     if (typeof window !== 'undefined' && (window as any)['API_URL']) {
       return (window as any)['API_URL'];
     }
-    if (typeof window !== 'undefined') {
-      const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://127.0.0.1:5000/api/issues';
-      }
-    }
     // Production HTTPS Port 443 IIS Rewrite endpoint
-    return '/ccp/api/issues';
+    return '/KavachComplaintPortal/api/issues';
   }
 
   constructor(private http: HttpClient) {}

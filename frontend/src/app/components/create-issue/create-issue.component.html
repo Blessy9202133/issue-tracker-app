@@ -52,7 +52,7 @@
 
           <!-- Station -->
           <div class="form-group">
-            <label for="station">Station</label>
+            <label for="station">Station <span class="required">*</span></label>
             <input
               type="text"
               id="station"
@@ -60,12 +60,13 @@
               [(ngModel)]="station"
               placeholder="Station Name"
               class="form-control"
+              required
             />
           </div>
 
           <!-- Loco Number -->
           <div class="form-group">
-            <label for="locoNumber">Loco Number</label>
+            <label for="locoNumber">Loco Number <span class="required">*</span></label>
             <input
               type="text"
               id="locoNumber"
@@ -76,6 +77,7 @@
               inputmode="numeric"
               pattern="[0-9]*"
               (input)="locoNumber = locoNumber.replace(/[^0-9]/g, '')"
+              required
             />
           </div>
         </div>

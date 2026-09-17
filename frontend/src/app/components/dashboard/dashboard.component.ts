@@ -25,7 +25,7 @@ export class DashboardComponent implements OnInit {
   zoneFilter = '';
   shedFilter = '';
 
-  complaintTypes = ['NMS', 'Application Related', 'Others'];
+  complaintTypes = ['Application Data', 'Loco Kavach Maintenance Issue','Stationary Kavach Maintenance Issue','Kavach Software Issue','Inter-Operability Issue','RFID Tag Issue','Other Kavach OEM Issue','Railway Issue', 'Others'];
 
   // Computed metrics from reactive signal
   totalCount = computed(() => this.issues().length);

@@ -23,8 +23,8 @@ const createIssue = async (req, res) => {
       issueRaisedDate,
     } = req.body;
 
-    if (!zone || !details) {
-      return res.status(400).json({ message: 'Zone and Complaint description are required' });
+   if (!zone?.trim() || !contract?.trim() || !station?.trim() || !locoNumber?.trim() || !details?.trim()) {
+      return res.status(400).json({ message: 'Zone, Division, Station, Loco Number, and Complaint description are required' });
     }
 
     // Process uploaded photo paths
@@ -234,11 +234,26 @@ const updateIssue = async (req, res) => {
       return res.status(400).json({ message: 'Closed complaints cannot be edited.' });
     }
 
-    if (zone !== undefined) issue.zone = zone;
-    if (contract !== undefined) issue.contract = contract;
-    if (station !== undefined) issue.station = station;
-    if (locoNumber !== undefined) issue.locoNumber = locoNumber;
-    if (details !== undefined) issue.details = details;
+    if (zone !== undefined) {
+      if (!zone.trim()) return res.status(400).json({ message: 'Zone is required' });
+      issue.zone = zone;
+    }
+    if (contract !== undefined) {
+      if (!contract.trim()) return res.status(400).json({ message: 'Division is required' });
+      issue.contract = contract;
+    }
+    if (station !== undefined) {
+      if (!station.trim()) return res.status(400).json({ message: 'Station is required' });
+      issue.station = station;
+    }
+    if (locoNumber !== undefined) {
+      if (!locoNumber.trim()) return res.status(400).json({ message: 'Loco Number is required' });
+      issue.locoNumber = locoNumber;
+    }
+    if (details !== undefined) {
+      if (!details.trim()) return res.status(400).json({ message: 'Complaint description is required' });
+      issue.details = details;
+    }
 
     // Handle existing and newly uploaded photos
     let updatedPhotos = issue.photos || [];

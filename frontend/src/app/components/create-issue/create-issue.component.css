@@ -57,7 +57,7 @@
 }
 .form-group label {
   display: block;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.35rem;
@@ -72,7 +72,7 @@
   margin-bottom: 0;
 }
 .word-counter {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #64748b;
   background-color: #f1f5f9;
@@ -91,7 +91,7 @@
   border-color: #fecaca;
 }
 .field-error-text {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #dc2626;
   font-weight: 600;
   margin-top: 0.35rem;
@@ -104,7 +104,7 @@
   padding: 0.65rem 0.85rem;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 500;
   color: #0f172a;
   box-sizing: border-box;
@@ -131,7 +131,7 @@
   cursor: pointer;
 }
 .file-help {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #64748b;
   margin-top: 0.35rem;
 }
@@ -168,7 +168,7 @@
   margin-bottom: 0.5rem;
 }
 .preview-filename {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   color: #334155;
   text-align: center;
   padding: 2px 4px;
@@ -198,6 +198,7 @@
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   font-weight: 600;
+  font-size: 1rem;
   cursor: pointer;
 }
 .btn-cancel:hover {
@@ -210,7 +211,7 @@
   border: none;
   border-radius: 8px;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
@@ -226,7 +227,7 @@
 .alert {
   padding: 0.85rem 1rem;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   margin-bottom: 1.5rem;
 }
 .alert-error { background-color: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
@@ -264,7 +265,7 @@
 
 .section-sub-label {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: #334155;
   margin-bottom: 0.5rem;
@@ -276,7 +277,7 @@
   padding: 3rem;
   text-align: center;
   color: #64748b;
-  font-size: 1rem;
+  font-size: 1.05rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
 }
@@ -336,7 +337,7 @@
 }
 
 .modal-title {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #0f172a;
   margin-bottom: 0.35rem;
@@ -344,7 +345,7 @@
 }
 
 .modal-subtitle {
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #64748b;
   margin-bottom: 1.5rem;
 }
@@ -361,7 +362,7 @@
 }
 
 .modal-code-label {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -370,7 +371,7 @@
 }
 
 .modal-code-value {
-  font-size: 1.6rem;
+  font-size: 1.65rem;
   font-weight: 900;
   color: #2563eb;
   letter-spacing: 1px;
@@ -384,7 +385,7 @@
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);

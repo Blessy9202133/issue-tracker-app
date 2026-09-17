@@ -1,7 +1,8 @@
 .dashboard-container {
-  max-width: 1240px;
-  margin: 2rem auto;
-  padding: 0 1.5rem;
+  max-width: 1400px;
+  width: 98%;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
 }
 .dashboard-header {
   display: flex;
@@ -10,13 +11,13 @@
   margin-bottom: 1.5rem;
 }
 .dashboard-header h2 {
-  font-size: 1.75rem;
+  font-size: 1.85rem;
   font-weight: 700;
   color: #0f172a;
 }
 .dashboard-header p {
   color: #64748b;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 .btn-create {
   background-color: #2563eb;
@@ -25,6 +26,7 @@
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
+  font-size: 1.05rem;
 }
 .btn-create:hover {
   background-color: #1d4ed8;
@@ -39,7 +41,7 @@
 }
 .metric-card {
   background: white;
-  padding: 1.25rem 1.5rem;
+  padding: 0.65rem 1.5rem;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -50,14 +52,14 @@
   box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.08);
 }
 .metric-value {
-  font-size: 2.25rem;
+  font-size: 2.35rem;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1.05;
   letter-spacing: -0.02em;
 }
 .metric-label {
-  font-size: 0.95rem;
-  margin-top: 0.4rem;
+  font-size: 1.05rem;
+  margin-top: 0.2rem;
   font-weight: 700;
   letter-spacing: 0.01em;
 }
@@ -116,15 +118,18 @@
   gap: 0.35rem;
 }
 .filter-group label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #475569;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
 }
 .filter-control {
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  padding: 0.55rem 0.85rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1.02rem;
+  font-weight: 500;
+  color: #0f172a;
+  background-color: #ffffff;
 }
 .filter-checkbox {
   flex-direction: row;
@@ -136,13 +141,14 @@
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  font-size: 0.95rem;
 }
 
 /* Category Badges */
 .category-badge {
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.55rem;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -162,8 +168,9 @@
   background: white;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
-  overflow-x: auto;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  overflow-x: hidden;
 }
 .issue-table {
   width: 100%;
@@ -173,7 +180,7 @@
 .issue-table th {
   background-color: #f8fafc;
   padding: 0.85rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: #0f172a;
   text-transform: uppercase;
@@ -186,7 +193,7 @@
 .issue-table td {
   padding: 0.85rem 0.75rem;
   border-bottom: 1px solid #f1f5f9;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #334155;
   text-align: center;
   vertical-align: middle;
@@ -197,8 +204,8 @@
   min-width: 135px;
 }
 .zone-tag { font-weight: 600; color: #1e293b; }
-.sub-location { font-size: 0.825rem; color: #475569; font-weight: 500; }
-.type-sub { font-size: 0.75rem; color: #64748b; }
+.sub-location { font-size: 0.88rem; color: #475569; font-weight: 500; }
+.type-sub { font-size: 0.82rem; color: #64748b; }
 .details-cell {
   max-width: 250px;
   white-space: nowrap;
@@ -211,13 +218,13 @@
   color: #2563eb;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
 }
 .no-photo { color: #94a3b8; }
 .user-cell { font-weight: 500; }
-.email-sub { font-size: 0.75rem; color: #64748b; }
+.email-sub { font-size: 0.82rem; color: #64748b; }
 .closed-date-text {
   font-weight: 600;
   color: #16a34a;
@@ -226,7 +233,7 @@
   border-radius: 4px;
   border: 1px solid #bbf7d0;
   display: inline-block;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 .no-data-dash {
   color: #94a3b8;
@@ -244,7 +251,7 @@
   display: inline-block;
   padding: 0.25rem 0.6rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   font-weight: 700;
   text-transform: uppercase;
   white-space: nowrap;
@@ -259,7 +266,7 @@
   border-radius: 6px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   display: inline-block;
   white-space: nowrap;
   transition: all 0.2s;
@@ -305,7 +312,7 @@
   display: inline-block;
   background-color: #eff6ff;
   color: #1d4ed8;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
   padding: 0.2rem 0.6rem;
   border-radius: 6px;

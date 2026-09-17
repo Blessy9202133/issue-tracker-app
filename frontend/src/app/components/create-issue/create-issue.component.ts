@@ -184,14 +184,14 @@ export class CreateIssueComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (!this.zone || !this.details) {
-      this.errorMessage.set('Please complete all required fields (Zone and Description).');
+    if (!this.zone || !this.contract?.trim() || !this.station?.trim() || !this.locoNumber?.trim() || !this.details?.trim()) {
+      this.errorMessage.set('Please complete all required fields (Zone, Division, Station, Loco Number, and Description).');
       this.cdr.markForCheck();
       return;
     }
 
-    if (this.getWordCount(this.details) > 1000) {
-      this.errorMessage.set('Complaint Description exceeds the limit of 1,000 words. Please shorten your description.');
+    if (!/^\d+$/.test(this.locoNumber.trim())) {
+      this.errorMessage.set('Loco Number must contain only digits.');
       this.cdr.markForCheck();
       return;
     }
@@ -201,13 +201,6 @@ export class CreateIssueComponent implements OnInit {
       this.cdr.markForCheck();
       return;
     }
-
-    if (this.locoNumber && this.locoNumber.trim() && !/^\d+$/.test(this.locoNumber.trim())) {
-      this.errorMessage.set('Loco Number must contain only digits.');
-      this.cdr.markForCheck();
-      return;
-    }
-
     this.submitting.set(true);
     this.errorMessage.set('');
     this.successMessage.set('');

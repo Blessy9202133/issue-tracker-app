@@ -29,12 +29,12 @@ app.use('/api/issues', issueRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Customer Complaint Portal API is running smoothly' });
+  res.json({ status: 'OK', message: 'Customer Complaint Portal For Kavach API is running smoothly' });
 });
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Customer Complaint Portal API running on port ${PORT}`);
+  console.log(`Customer Complaint Portal For Kavach API running on port ${PORT}`);
 });
 
