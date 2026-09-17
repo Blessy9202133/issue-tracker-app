@@ -17,6 +17,8 @@ export interface Issue {
   otherComplaintType?: string;
   shed?: string;
   locoNumber?: string;
+  occurrenceDate?: string;
+  occurrenceTime?: string;
   locoType?: string;
   brakeType?: string;
   failureType?: string;
@@ -47,6 +49,8 @@ export interface CreateIssueDto {
   otherComplaintType?: string;
   shed?: string;
   locoNumber?: string;
+  occurrenceDate?: string;
+  occurrenceTime?: string;
   locoType?: string;
   brakeType?: string;
   failureType?: string;

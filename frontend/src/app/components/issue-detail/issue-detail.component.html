@@ -40,23 +40,32 @@
       <!-- Compact Metadata Row -->
       <div class="meta-row">
         <div class="meta-item">
-          <span class="meta-label">Division:</span>
+          <span class="meta-label">Division</span>
           <span class="meta-val">{{ i.contract || 'N/A' }}</span>
         </div>
 
         <div class="meta-item">
-          <span class="meta-label">Station:</span>
+          <span class="meta-label">Station</span>
           <span class="meta-val">{{ i.station || 'N/A' }}</span>
         </div>
 
         <div class="meta-item">
-          <span class="meta-label">Loco ID:</span>
+          <span class="meta-label">Loco ID</span>
           <span class="meta-val highlight">{{ i.locoNumber || 'N/A' }}</span>
         </div>
 
+        @if (i.occurrenceDate || i.occurrenceTime) {
+          <div class="meta-item">
+            <span class="meta-label">Occurrence Date & Time</span>
+            <span class="meta-val date-highlight">
+              {{ i.occurrenceDate ? (i.occurrenceDate | date: 'MMM d, y') : '' }}{{ i.occurrenceDate && i.occurrenceTime ? ', ' : '' }}{{ i.occurrenceTime || '' }}
+            </span>
+          </div>
+        }
+
         <div class="meta-item">
-          <span class="meta-label">Raised Date & Time:</span>
-          <span class="meta-val">{{ i.issueRaisedDate | date: 'medium' }}</span>
+          <span class="meta-label">Raised Date & Time</span>
+          <span class="meta-val">{{ i.issueRaisedDate | date: 'MMM d, y, h:mm:ss a' }}</span>
         </div>
 
         @if (i.closedDate || (i.status === 'CLOSED' && i.updatedAt)) {

@@ -74,6 +74,7 @@
           <tr>
             <th class="col-id">ID</th>
             <th>Zone and Location</th>
+            <th>Occurred On</th>
             <th>Raised On</th>
             <th>Attachments</th>
             <th>Status</th>
@@ -98,7 +99,26 @@
                   <div class="type-sub">Loco: {{ issue.locoNumber }}</div>
                 }
               </td>
-              <td>{{ issue.issueRaisedDate | date: 'medium' }}</td>
+              <td>
+                @if (issue.occurrenceDate || issue.occurrenceTime) {
+                  <div class="date-cell">
+                    @if (issue.occurrenceDate) {
+                      <div class="date-main">{{ issue.occurrenceDate | date:'MMM d, y' }}</div>
+                    }
+                    @if (issue.occurrenceTime) {
+                      <div class="sub-location">{{ issue.occurrenceTime }}</div>
+                    }
+                  </div>
+                } @else {
+                  <span class="no-data-dash">-</span>
+                }
+              </td>
+              <td>
+                <div class="date-cell">
+                  <div class="date-main">{{ issue.issueRaisedDate | date: 'MMM d, y' }}</div>
+                  <div class="sub-location">{{ issue.issueRaisedDate | date: 'h:mm:ss a' }}</div>
+                </div>
+              </td>
               <td>
                 @if (issue.photos && issue.photos.length > 0) {
                   <span class="photo-badge">📎 {{ issue.photos.length }}</span>
@@ -113,7 +133,10 @@
               </td>
               <td>
                 @if (issue.closedDate || (issue.status === 'CLOSED' && issue.updatedAt)) {
-                  <span class="closed-date-text">{{ (issue.closedDate || issue.updatedAt) | date: 'medium' }}</span>
+                  <div class="closed-date-text">
+                    <div>{{ (issue.closedDate || issue.updatedAt) | date: 'MMM d, y' }}</div>
+                    <div style="font-size: 0.78rem; opacity: 0.9;">{{ (issue.closedDate || issue.updatedAt) | date: 'h:mm a' }}</div>
+                  </div>
                 } @else {
                   <span class="no-data-dash">-</span>
                 }

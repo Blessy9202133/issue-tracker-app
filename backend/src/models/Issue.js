@@ -60,6 +60,13 @@ const issueSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    occurrenceDate: {
+      type: Date,
+    },
+    occurrenceTime: {
+      type: String,
+      trim: true,
+    },
     locoType: {
       type: String,
       trim: true,

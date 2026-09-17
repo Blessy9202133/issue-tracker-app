@@ -6,6 +6,7 @@ const Issue = require('../models/Issue');
 // @access  Private
 const createIssue = async (req, res) => {
   try {
+    console.log('Incoming issue creation payload:', req.body);
     const {
       complaintCategory,
       zone,
@@ -15,6 +16,8 @@ const createIssue = async (req, res) => {
       otherComplaintType,
       shed,
       locoNumber,
+      occurrenceDate,
+      occurrenceTime,
       locoType,
       brakeType,
       failureType,
@@ -23,14 +26,25 @@ const createIssue = async (req, res) => {
       issueRaisedDate,
     } = req.body;
 
-   if (!zone?.trim() || !contract?.trim() || !station?.trim() || !locoNumber?.trim() || !details?.trim()) {
-      return res.status(400).json({ message: 'Zone, Division, Station, Loco Number, and Complaint description are required' });
+   if (!zone?.trim() || !contract?.trim() || !station?.trim() || !locoNumber?.trim() || !occurrenceDate || !occurrenceTime || !details?.trim()) {
+      return res.status(400).json({ message: 'Zone, Division, Station, Loco Number, Date of Occurrence, Time of Occurrence, and Complaint description are required' });
     }
 
     // Process uploaded photo paths
     let photos = [];
     if (req.files && req.files.length > 0) {
       photos = req.files.map((file) => `/uploads/${file.filename}`);
+    }
+
+    let parsedOccurrenceDate = null;
+    if (occurrenceDate && typeof occurrenceDate === 'string' && occurrenceDate.trim()) {
+      const dateStr = occurrenceDate.includes('T') ? occurrenceDate : `${occurrenceDate.trim()}T00:00:00`;
+      const d = new Date(dateStr);
+      if (!isNaN(d.getTime())) {
+        parsedOccurrenceDate = d;
+      }
+    } else if (occurrenceDate instanceof Date && !isNaN(occurrenceDate.getTime())) {
+      parsedOccurrenceDate = occurrenceDate;
     }
 
     const issueData = {
@@ -42,6 +56,8 @@ const createIssue = async (req, res) => {
       otherComplaintType: complaintType === 'Others' ? (otherComplaintType || '') : '',
       shed,
       locoNumber,
+      occurrenceDate: parsedOccurrenceDate,
+      occurrenceTime: occurrenceTime ? occurrenceTime.trim() : '',
       locoType,
       brakeType,
       failureType,
@@ -223,7 +239,7 @@ const respondToIssue = async (req, res) => {
 // @access  Private
 const updateIssue = async (req, res) => {
   try {
-    const { zone, contract, station, locoNumber, details, issueRaisedDate, existingPhotos } = req.body;
+    const { zone, contract, station, locoNumber, occurrenceDate, occurrenceTime, details, issueRaisedDate, existingPhotos } = req.body;
 
     const issue = await Issue.findById(req.params.id);
     if (!issue) {
@@ -249,6 +265,24 @@ const updateIssue = async (req, res) => {
     if (locoNumber !== undefined) {
       if (!locoNumber.trim()) return res.status(400).json({ message: 'Loco Number is required' });
       issue.locoNumber = locoNumber;
+    }
+    if (occurrenceDate !== undefined) {
+      if (occurrenceDate && typeof occurrenceDate === 'string' && occurrenceDate.trim()) {
+        const dateStr = occurrenceDate.includes('T') ? occurrenceDate : `${occurrenceDate.trim()}T00:00:00`;
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          issue.occurrenceDate = d;
+        } else {
+          issue.occurrenceDate = null;
+        }
+      } else if (occurrenceDate instanceof Date && !isNaN(occurrenceDate.getTime())) {
+        issue.occurrenceDate = occurrenceDate;
+      } else {
+        issue.occurrenceDate = null;
+      }
+    }
+    if (occurrenceTime !== undefined) {
+      issue.occurrenceTime = occurrenceTime ? occurrenceTime.trim() : '';
     }
     if (details !== undefined) {
       if (!details.trim()) return res.status(400).json({ message: 'Complaint description is required' });

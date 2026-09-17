@@ -23,6 +23,8 @@ export class CreateIssueComponent implements OnInit {
   contract = '';
   station = '';
   locoNumber = '';
+  occurrenceDate = '';
+  occurrenceTime = '';
   details = '';
   issueRaisedDateDisplay = signal<string>(this.formatDateTimeDisplay(new Date()));
   existingPhotos = signal<string[]>([]);
@@ -100,6 +102,8 @@ export class CreateIssueComponent implements OnInit {
         this.contract = issue.contract || '';
         this.station = issue.station || '';
         this.locoNumber = issue.locoNumber || '';
+        this.occurrenceDate = issue.occurrenceDate ? new Date(issue.occurrenceDate).toISOString().split('T')[0] : '';
+        this.occurrenceTime = issue.occurrenceTime || '';
         this.details = issue.details || '';
         this.issueRaisedDateDisplay.set(this.formatDateTimeDisplay(issue.issueRaisedDate));
         this.existingPhotos.set(issue.photos || []);
@@ -183,9 +187,30 @@ export class CreateIssueComponent implements OnInit {
     return words.length;
   }
 
+  triggerPicker(event: any): void {
+    const target = event.target as any;
+    if (target && typeof target.showPicker === 'function') {
+      try {
+        target.showPicker();
+      } catch (e) {
+        // Fallback if browser security context restricts showPicker
+      }
+    }
+  }
+
   onSubmit(): void {
-    if (!this.zone || !this.contract?.trim() || !this.station?.trim() || !this.locoNumber?.trim() || !this.details?.trim()) {
-      this.errorMessage.set('Please complete all required fields (Zone, Division, Station, Loco Number, and Description).');
+    if (
+      !this.zone ||
+      !this.contract?.trim() ||
+      !this.station?.trim() ||
+      !this.locoNumber?.trim() ||
+      !this.occurrenceDate?.trim() ||
+      !this.occurrenceTime?.trim() ||
+      !this.details?.trim()
+    ) {
+      this.errorMessage.set(
+        'Please complete all required fields (Zone, Division, Station, Loco Number, Date of Occurrence, Time of Occurrence, and Description).'
+      );
       this.cdr.markForCheck();
       return;
     }
@@ -206,12 +231,15 @@ export class CreateIssueComponent implements OnInit {
     this.successMessage.set('');
     this.cdr.markForCheck();
 
+    console.log('Submitting complaint with occurrenceDate:', this.occurrenceDate, 'occurrenceTime:', this.occurrenceTime);
     const formData = new FormData();
     formData.append('zone', this.zone);
     formData.append('contract', this.contract.trim());
     formData.append('details', this.details.trim());
     formData.append('station', this.station ? this.station.trim() : '');
     formData.append('locoNumber', this.locoNumber ? this.locoNumber.trim() : '');
+    formData.append('occurrenceDate', this.occurrenceDate || '');
+    formData.append('occurrenceTime', this.occurrenceTime || '');
 
     if (this.isEditMode()) {
       formData.append('existingPhotos', JSON.stringify(this.existingPhotos()));

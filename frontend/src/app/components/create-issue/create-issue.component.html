@@ -80,6 +80,36 @@
               required
             />
           </div>
+
+          <!-- Date of Occurrence -->
+          <div class="form-group">
+            <label for="occurrenceDate">Date of Occurrence <span class="required">*</span></label>
+            <input
+              type="date"
+              id="occurrenceDate"
+              name="occurrenceDate"
+              [(ngModel)]="occurrenceDate"
+              class="form-control"
+              (click)="triggerPicker($event)"
+              required
+            />
+          </div>
+
+          <!-- Time of Occurrence -->
+          <div class="form-group">
+            <label for="occurrenceTime">Time of Occurrence (HH:mm:ss) <span class="required">*</span></label>
+            <input
+              type="time"
+              step="1"
+              id="occurrenceTime"
+              name="occurrenceTime"
+              [(ngModel)]="occurrenceTime"
+              placeholder="HH:mm:ss"
+              class="form-control"
+              (click)="triggerPicker($event)"
+              required
+            />
+          </div>
         </div>
 
         <!-- ==================== COMMON FIELDS ==================== -->
