@@ -25,6 +25,12 @@ export class CreateIssueComponent implements OnInit {
   locoNumber = '';
   occurrenceDate = '';
   occurrenceTime = '';
+  timeHH = '';
+  timeMM = '';
+  timeSS = '';
+  hoursList = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  minutesList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+  secondsList = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
   details = '';
   issueRaisedDateDisplay = signal<string>(this.formatDateTimeDisplay(new Date()));
   existingPhotos = signal<string[]>([]);
@@ -104,6 +110,16 @@ export class CreateIssueComponent implements OnInit {
         this.locoNumber = issue.locoNumber || '';
         this.occurrenceDate = issue.occurrenceDate ? new Date(issue.occurrenceDate).toISOString().split('T')[0] : '';
         this.occurrenceTime = issue.occurrenceTime || '';
+        if (this.occurrenceTime && this.occurrenceTime.includes(':')) {
+          const parts = this.occurrenceTime.split(':');
+          this.timeHH = parts[0] ? parts[0].padStart(2, '0') : '';
+          this.timeMM = parts[1] ? parts[1].padStart(2, '0') : '';
+          this.timeSS = parts[2] ? parts[2].padStart(2, '0') : '';
+        } else {
+          this.timeHH = '';
+          this.timeMM = '';
+          this.timeSS = '';
+        }
         this.details = issue.details || '';
         this.issueRaisedDateDisplay.set(this.formatDateTimeDisplay(issue.issueRaisedDate));
         this.existingPhotos.set(issue.photos || []);
@@ -193,9 +209,30 @@ export class CreateIssueComponent implements OnInit {
       try {
         target.showPicker();
       } catch (e) {
-        // Fallback if browser security context restricts showPicker
+        // Fallback
       }
     }
+  }
+
+  setCurrentRailwayTime(): void {
+    const now = new Date();
+    this.timeHH = now.getHours().toString().padStart(2, '0');
+    this.timeMM = now.getMinutes().toString().padStart(2, '0');
+    this.timeSS = now.getSeconds().toString().padStart(2, '0');
+    this.updateOccurrenceTime();
+    this.cdr.markForCheck();
+  }
+
+  updateOccurrenceTime(): void {
+    if (this.timeHH && this.timeMM) {
+      const hh = this.timeHH.padStart(2, '0');
+      const mm = this.timeMM.padStart(2, '0');
+      const ss = (this.timeSS || '00').padStart(2, '0');
+      this.occurrenceTime = `${hh}:${mm}:${ss}`;
+    } else {
+      this.occurrenceTime = '';
+    }
+    this.cdr.markForCheck();
   }
 
   padZero(val: string): string {
