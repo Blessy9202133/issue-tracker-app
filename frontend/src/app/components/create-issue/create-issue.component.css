@@ -407,65 +407,62 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Seamless 24-Hour Time Control Styles */
-.seamless-time-container {
+/* Simple 24-Hour Railway Time Select Dropdowns Group */
+.simple-time-select-group {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 0.65rem 0.85rem;
+  gap: 6px;
   width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  cursor: text;
 }
 
-.seamless-time-container:focus-within {
-  border-color: #2563eb;
+.time-select-box {
+  flex: 1;
+  min-width: 60px;
+  padding: 0.6rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Consolas', 'Courier New', monospace;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
   outline: none;
+}
+
+.time-select-box:focus {
+  border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
-.seamless-time-input {
-  width: 32px;
-  text-align: center;
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  font-size: 1rem;
+.time-select-box option {
   font-weight: 600;
-  color: #0f172a;
-  padding: 0;
-  box-shadow: none !important;
+  padding: 4px;
 }
 
-.seamless-time-input::placeholder {
-  color: #94a3b8;
-  font-weight: 400;
-}
-
-.seamless-time-colon {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #64748b;
+.colon-sep {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #475569;
   user-select: none;
 }
 
-.clock-icon-button {
-  margin-left: auto;
-  background: none;
-  border: none;
-  padding: 2px;
+.btn-now-simple {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: background 0.2s;
+  white-space: nowrap;
+  transition: all 0.2s ease;
 }
 
-.clock-icon-button:hover {
-  background-color: #f1f5f9;
+.btn-now-simple:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
 }
