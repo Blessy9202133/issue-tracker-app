@@ -25,6 +25,9 @@ export class CreateIssueComponent implements OnInit {
   locoNumber = '';
   occurrenceDate = '';
   occurrenceTime = '';
+  timeHH = '';
+  timeMM = '';
+  timeSS = '';
   details = '';
   issueRaisedDateDisplay = signal<string>(this.formatDateTimeDisplay(new Date()));
   existingPhotos = signal<string[]>([]);
@@ -104,6 +107,16 @@ export class CreateIssueComponent implements OnInit {
         this.locoNumber = issue.locoNumber || '';
         this.occurrenceDate = issue.occurrenceDate ? new Date(issue.occurrenceDate).toISOString().split('T')[0] : '';
         this.occurrenceTime = issue.occurrenceTime || '';
+        if (this.occurrenceTime) {
+          const parts = this.occurrenceTime.split(':');
+          this.timeHH = parts[0] ? parts[0].padStart(2, '0') : '';
+          this.timeMM = parts[1] ? parts[1].padStart(2, '0') : '';
+          this.timeSS = parts[2] ? parts[2].padStart(2, '0') : '';
+        } else {
+          this.timeHH = '';
+          this.timeMM = '';
+          this.timeSS = '';
+        }
         this.details = issue.details || '';
         this.issueRaisedDateDisplay.set(this.formatDateTimeDisplay(issue.issueRaisedDate));
         this.existingPhotos.set(issue.photos || []);
@@ -196,6 +209,76 @@ export class CreateIssueComponent implements OnInit {
         // Fallback if browser security context restricts showPicker
       }
     }
+  }
+
+  onHHInput(event: any): void {
+    let val = event.target.value.replace(/[^0-9]/g, '');
+    if (val.length > 2) val = val.substring(0, 2);
+    if (parseInt(val, 10) > 23) val = '23';
+    this.timeHH = val;
+    event.target.value = val;
+    this.updateOccurrenceTime();
+    if (val.length === 2) {
+      const nextElem = document.getElementById('timeMM');
+      if (nextElem) nextElem.focus();
+    }
+  }
+
+  onMMInput(event: any): void {
+    let val = event.target.value.replace(/[^0-9]/g, '');
+    if (val.length > 2) val = val.substring(0, 2);
+    if (parseInt(val, 10) > 59) val = '59';
+    this.timeMM = val;
+    event.target.value = val;
+    this.updateOccurrenceTime();
+    if (val.length === 2) {
+      const nextElem = document.getElementById('timeSS');
+      if (nextElem) nextElem.focus();
+    }
+  }
+
+  onSSInput(event: any): void {
+    let val = event.target.value.replace(/[^0-9]/g, '');
+    if (val.length > 2) val = val.substring(0, 2);
+    if (parseInt(val, 10) > 59) val = '59';
+    this.timeSS = val;
+    event.target.value = val;
+    this.updateOccurrenceTime();
+  }
+
+  updateOccurrenceTime(): void {
+    if (this.timeHH || this.timeMM || this.timeSS) {
+      const hh = this.padZero(this.timeHH);
+      const mm = this.padZero(this.timeMM);
+      const ss = this.padZero(this.timeSS);
+      this.occurrenceTime = `${hh}:${mm}:${ss}`;
+    } else {
+      this.occurrenceTime = '';
+    }
+  }
+
+  focusTimeInput(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target && target.tagName !== 'INPUT' && target.tagName !== 'BUTTON' && !target.closest('button')) {
+      const hhInput = document.getElementById('timeHH');
+      if (hhInput) hhInput.focus();
+    }
+  }
+
+  setCurrentRailwayTime(): void {
+    const now = new Date();
+    this.timeHH = now.getHours().toString().padStart(2, '0');
+    this.timeMM = now.getMinutes().toString().padStart(2, '0');
+    this.timeSS = now.getSeconds().toString().padStart(2, '0');
+    this.updateOccurrenceTime();
+    this.cdr.markForCheck();
+  }
+
+  padZero(val: string): string {
+    if (!val) return '00';
+    const num = parseInt(val, 10);
+    if (isNaN(num)) return '00';
+    return num.toString().padStart(2, '0');
   }
 
   onSubmit(): void {

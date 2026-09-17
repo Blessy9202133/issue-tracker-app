@@ -98,17 +98,59 @@
           <!-- Time of Occurrence -->
           <div class="form-group">
             <label for="occurrenceTime">Time of Occurrence (HH:mm:ss) <span class="required">*</span></label>
-            <input
-              type="time"
-              step="1"
-              id="occurrenceTime"
-              name="occurrenceTime"
-              [(ngModel)]="occurrenceTime"
-              placeholder="HH:mm:ss"
-              class="form-control"
-              (click)="triggerPicker($event)"
-              required
-            />
+            <div class="seamless-time-container" (click)="focusTimeInput($event)">
+              <input
+                type="text"
+                id="timeHH"
+                name="timeHH"
+                [(ngModel)]="timeHH"
+                placeholder="HH"
+                maxlength="2"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="seamless-time-input"
+                (input)="onHHInput($event)"
+                required
+              />
+              <span class="seamless-time-colon">:</span>
+              <input
+                type="text"
+                id="timeMM"
+                name="timeMM"
+                [(ngModel)]="timeMM"
+                placeholder="mm"
+                maxlength="2"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="seamless-time-input"
+                (input)="onMMInput($event)"
+                required
+              />
+              <span class="seamless-time-colon">:</span>
+              <input
+                type="text"
+                id="timeSS"
+                name="timeSS"
+                [(ngModel)]="timeSS"
+                placeholder="ss"
+                maxlength="2"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                class="seamless-time-input"
+                (input)="onSSInput($event)"
+              />
+              <button
+                type="button"
+                class="clock-icon-button"
+                title="Set Current 24-Hour Time"
+                (click)="setCurrentRailwayTime(); $event.stopPropagation()"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 

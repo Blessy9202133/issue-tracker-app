@@ -406,3 +406,66 @@
   from { opacity: 0; transform: scale(0.92); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* Seamless 24-Hour Time Control Styles */
+.seamless-time-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  cursor: text;
+}
+
+.seamless-time-container:focus-within {
+  border-color: #2563eb;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.seamless-time-input {
+  width: 32px;
+  text-align: center;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+  padding: 0;
+  box-shadow: none !important;
+}
+
+.seamless-time-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.seamless-time-colon {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #64748b;
+  user-select: none;
+}
+
+.clock-icon-button {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.clock-icon-button:hover {
+  background-color: #f1f5f9;
+}
