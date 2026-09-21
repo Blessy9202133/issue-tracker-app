@@ -53,24 +53,68 @@
       </select>
     </div>
 
-    <div class="filter-group">
-      <label>Month</label>
-      <select [(ngModel)]="monthFilter" (change)="onFilterChange()" class="filter-control">
-        <option value="">All Months</option>
-        @for (m of monthsList; track m.value) {
-          <option [value]="m.value">{{ m.name }}</option>
-        }
-      </select>
-    </div>
+    <div class="filter-group date-flyout-container">
+      <label>Month & Year</label>
+      <button
+        type="button"
+        class="filter-control date-flyout-btn"
+        (click)="toggleDateFlyout()"
+      >
+        <span>📅 {{ dateFilterLabel }}</span>
+        <span class="arrow-icon">{{ showDateFlyout ? '▲' : '▼' }}</span>
+      </button>
 
-    <div class="filter-group">
-      <label>Year</label>
-      <select [(ngModel)]="yearFilter" (change)="onFilterChange()" class="filter-control">
-        <option value="">All Years</option>
-        @for (y of yearsList; track y) {
-          <option [value]="y">{{ y }}</option>
-        }
-      </select>
+      @if (showDateFlyout) {
+        <div class="date-side-flyout">
+          <!-- Header Bar -->
+          <div class="flyout-header">
+            <span class="flyout-title">Filter by Year & Month</span>
+            <button type="button" class="btn-reset-date" (click)="applyYearMonth('', '')">All Months & Years</button>
+          </div>
+
+          <!-- Two Side-by-Side Panel Columns -->
+          <div class="side-panel-body">
+            <!-- Left Column: Years -->
+            <div class="years-column">
+              <div class="column-heading">Years</div>
+              @for (y of yearsList; track y) {
+                <div
+                  class="year-item"
+                  [class.active]="selectedYear === y"
+                  (mouseenter)="selectedYear = y"
+                  (click)="selectedYear = y"
+                >
+                  <span>{{ y }}</span>
+                  <span class="chevron">›</span>
+                </div>
+              }
+            </div>
+
+            <!-- Right Column: Months for Selected Year -->
+            <div class="months-column">
+              <div class="column-heading">
+                <span>Months of {{ selectedYear }}</span>
+                <button type="button" class="btn-all-year" (click)="applyYearMonth(selectedYear, '')">
+                  All {{ selectedYear }}
+                </button>
+              </div>
+
+              <div class="months-grid">
+                @for (m of monthsNames; track $index) {
+                  <button
+                    type="button"
+                    class="month-chip"
+                    [class.selected]="yearFilter === selectedYear && monthFilter === ($index + 1).toString()"
+                    (click)="applyYearMonth(selectedYear, ($index + 1).toString())"
+                  >
+                    {{ m }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   </div>
 

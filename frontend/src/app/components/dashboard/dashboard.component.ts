@@ -27,22 +27,47 @@ export class DashboardComponent implements OnInit {
   monthFilter = '';
   yearFilter = '';
 
-  yearsList = ['2024', '2025', '2026', '2027'];
+  // Side-View Flyout Filter State
+  showDateFlyout = false;
+  selectedYear = new Date().getFullYear().toString();
 
-  monthsList = [
-    { value: '1', name: 'January' },
-    { value: '2', name: 'February' },
-    { value: '3', name: 'March' },
-    { value: '4', name: 'April' },
-    { value: '5', name: 'May' },
-    { value: '6', name: 'June' },
-    { value: '7', name: 'July' },
-    { value: '8', name: 'August' },
-    { value: '9', name: 'September' },
-    { value: '10', name: 'October' },
-    { value: '11', name: 'November' },
-    { value: '12', name: 'December' },
-  ];
+  monthsNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  get yearsList(): string[] {
+    const startYear = 2020;
+    const endYear = new Date().getFullYear() + 4; // 2020 through 2030
+    const years: string[] = [];
+    for (let y = endYear; y >= startYear; y--) {
+      years.push(y.toString());
+    }
+    return years;
+  }
+
+  get dateFilterLabel(): string {
+    if (!this.yearFilter && !this.monthFilter) {
+      return 'All Months & Years';
+    }
+    if (this.yearFilter && !this.monthFilter) {
+      return `All ${this.yearFilter}`;
+    }
+    const mIndex = parseInt(this.monthFilter, 10);
+    const mName = !isNaN(mIndex) && mIndex >= 1 && mIndex <= 12 ? this.monthsNames[mIndex - 1] : '';
+    return `${mName} ${this.yearFilter}`.trim();
+  }
+
+  toggleDateFlyout(): void {
+    this.showDateFlyout = !this.showDateFlyout;
+  }
+
+  applyYearMonth(year: string, month: string): void {
+    this.yearFilter = year;
+    this.monthFilter = month;
+    if (year) {
+      this.selectedYear = year;
+    }
+    this.showDateFlyout = false;
+    this.fetchIssues();
+  }
 
   complaintTypes = ['Application Data', 'Loco Kavach Maintenance Issue','Stationary Kavach Maintenance Issue','Kavach Software Issue','Inter-Operability Issue','RFID Tag Issue','Other Kavach OEM Issue','Railway Issue', 'Others'];
 

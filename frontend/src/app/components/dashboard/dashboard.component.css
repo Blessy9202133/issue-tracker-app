@@ -131,6 +131,182 @@
   color: #0f172a;
   background-color: #ffffff;
 }
+
+/* Side-View Date Filter Flyout Styles */
+.date-flyout-container {
+  position: relative;
+}
+
+.date-flyout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 220px;
+  cursor: pointer;
+  background-color: #ffffff;
+}
+
+.arrow-icon {
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  opacity: 0.7;
+}
+
+.date-side-flyout {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 1000;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.18);
+  width: 440px;
+  max-width: 92vw;
+  overflow: hidden;
+  animation: fadeInFlyout 0.15s ease-out;
+}
+
+@keyframes fadeInFlyout {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.flyout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.flyout-title {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #0f172a;
+}
+
+.btn-reset-date {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btn-reset-date:hover {
+  text-decoration: underline;
+}
+
+.side-panel-body {
+  display: flex;
+  min-height: 250px;
+}
+
+.years-column {
+  width: 120px;
+  background-color: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  padding: 0.4rem 0;
+  max-height: 270px;
+  overflow-y: auto;
+}
+
+.column-heading {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  padding: 0.35rem 0.75rem;
+  letter-spacing: 0.03em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.year-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.year-item:hover, .year-item.active {
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.year-item.active .chevron {
+  color: #2563eb;
+  font-weight: 900;
+}
+
+.chevron {
+  font-size: 1rem;
+  color: #94a3b8;
+}
+
+.months-column {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-all-year {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-all-year:hover {
+  background: #dbeafe;
+}
+
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.month-chip {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #1e293b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.month-chip:hover {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  color: #2563eb;
+}
+
+.month-chip.selected {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  font-weight: 700;
+}
 .filter-checkbox {
   flex-direction: row;
   align-items: center;

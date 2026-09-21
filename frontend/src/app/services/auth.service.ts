@@ -30,7 +30,7 @@ export class AuthService {
       const protocol = window.location.protocol;
       return `${protocol}//${hostname}:4915/api/auth`;
     }
-    return 'http://127.0.0.1:4915/api/auth';
+    return 'https://eg.hbl.in:4915/api/auth';
   }
 
   // Angular Signal for reactive current user state

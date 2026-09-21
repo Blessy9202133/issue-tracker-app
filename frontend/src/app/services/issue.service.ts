@@ -13,11 +13,10 @@ export class IssueService {
     }
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
-      const protocol = window.location.protocol; // 'https:' or 'http:'
-      // Connect directly to Node backend port 4915 matching LOCO WFMS (https://eg.hbl.in:4915/api/issues)
+      const protocol = window.location.protocol;
       return `${protocol}//${hostname}:4915/api/issues`;
     }
-    return 'http://127.0.0.1:4915/api/issues';
+    return 'https://eg.hbl.in:4915/api/issues';
   }
 
   constructor(private http: HttpClient) {}

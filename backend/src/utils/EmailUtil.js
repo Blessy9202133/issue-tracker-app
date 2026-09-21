@@ -15,11 +15,52 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// In-Memory Background Email Queue Service (Matching WFMS 1:1)
+const emailQueue = [];
+let isProcessingQueue = false;
+
+const processEmailQueue = async () => {
+  if (isProcessingQueue || emailQueue.length === 0) return;
+  isProcessingQueue = true;
+
+  while (emailQueue.length > 0) {
+    const job = emailQueue.shift();
+    let success = false;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    while (!success && attempts < maxAttempts) {
+      attempts++;
+      try {
+        await transporter.sendMail(job.mailOptions);
+        console.log(`[Email Queue Worker] ✓ Email successfully dispatched to ${job.mailOptions.to} (Attempt ${attempts})`);
+        success = true;
+      } catch (err) {
+        console.warn(`[Email Queue Worker] ⚠️ Attempt ${attempts}/${maxAttempts} failed for ${job.mailOptions.to}: ${err.message}`);
+        if (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 2000 * attempts));
+        } else {
+          console.error(`[Email Queue Worker] ❌ Email delivery failed permanently for ${job.mailOptions.to}. Fallback Link: ${job.fallbackLink || 'N/A'}`);
+        }
+      }
+    }
+  }
+
+  isProcessingQueue = false;
+};
+
+// Enqueue email job into background queue service
+const enqueueEmail = (mailOptions, fallbackLink = null) => {
+  emailQueue.push({ mailOptions, fallbackLink });
+  setImmediate(processEmailQueue);
+};
+
 const sendForgotPasswordEmail = async (name, email, hash) => {
-  const resetLink = `${WEB_URL}/reset-password?hash=${hash}`;
+  const baseUrl = WEB_URL.replace(/\/+$/, '');
+  const resetLink = `${baseUrl}/reset-password?hash=${hash}`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-      <h2 style="color: #065f46;">Customer Complaint Portal - Password Reset</h2>
+      <h2 style="color: #2563eb;">Customer Complaint Portal - Password Reset</h2>
       <p>Hello <strong>${name}</strong>,</p>
       <p>We received a request to reset your password. Click the button below to set a new password:</p>
       <p style="text-align: center; margin: 25px 0;">
@@ -31,21 +72,23 @@ const sendForgotPasswordEmail = async (name, email, hash) => {
     </div>
   `;
 
-  try {
-    await transporter.sendMail({
-      from: `Customer Complaint Portal <${EMAIL_USER}>`,
-      to: email,
-      subject: 'CCP - Password Reset Request',
-      html,
-    });
-    console.log(`Password reset email sent to ${email}`);
-    return { status: true, message: 'Password reset link sent to your email.' };
-  } catch (err) {
-    console.warn(`Could not send password reset email via SMTP (${err.message}). Reset link generated: ${resetLink}`);
-    return { status: true, message: 'Password reset link generated.', hash, resetLink };
-  }
+  const mailOptions = {
+    from: `Customer Complaint Portal <${EMAIL_USER}>`,
+    to: email,
+    subject: 'CCP - Password Reset Request',
+    html,
+  };
+
+  enqueueEmail(mailOptions, resetLink);
+
+  return {
+    status: true,
+    message: 'Password reset link has been queued for email delivery.',
+    resetLink,
+  };
 };
 
 module.exports = {
   sendForgotPasswordEmail,
+  enqueueEmail,
 };
