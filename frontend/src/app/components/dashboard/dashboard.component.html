@@ -62,6 +62,16 @@
         }
       </select>
     </div>
+
+    <div class="filter-group">
+      <label>Year</label>
+      <select [(ngModel)]="yearFilter" (change)="onFilterChange()" class="filter-control">
+        <option value="">All Years</option>
+        @for (y of yearsList; track y) {
+          <option [value]="y">{{ y }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   <!-- Browser Cache Notice Banner -->

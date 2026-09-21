@@ -25,6 +25,9 @@ export class DashboardComponent implements OnInit {
   zoneFilter = '';
   shedFilter = '';
   monthFilter = '';
+  yearFilter = '';
+
+  yearsList = ['2024', '2025', '2026', '2027'];
 
   monthsList = [
     { value: '1', name: 'January' },
@@ -92,6 +95,7 @@ export class DashboardComponent implements OnInit {
         zone: this.zoneFilter,
         shed: this.shedFilter,
         month: this.monthFilter,
+        year: this.yearFilter,
       })
       .subscribe({
         next: (issuesList) => {

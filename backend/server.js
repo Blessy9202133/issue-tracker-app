@@ -13,9 +13,13 @@ const { initBackupScheduler } = require('./src/utils/backupScheduler');
 const Constants = require('./src/utils/Constants');
 const Helper = require('./src/utils/Helper');
 const issueRoutes = require('./src/routes/issueRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const { seedAdmin } = require('./src/controllers/authController');
 
-// Connect Database
-connectDB();
+// Connect Database & Seed default admin if needed
+connectDB().then(() => {
+  seedAdmin();
+});
 
 // Initialize automatic folder creation matching LOCO WFMS (files, certificates, logs, backups)
 Helper.createFolders();
@@ -47,6 +51,7 @@ app.use('/uploads', express.static(uploadDir));
 
 // Routes
 app.use('/api/issues', issueRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

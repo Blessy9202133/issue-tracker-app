@@ -33,6 +33,7 @@ export class IssueService {
     zone?: string;
     shed?: string;
     month?: string;
+    year?: string;
     assignedToMe?: boolean;
   }): Observable<Issue[]> {
     let params = new HttpParams();
@@ -43,6 +44,7 @@ export class IssueService {
       if (filters.zone) params = params.set('zone', filters.zone);
       if (filters.shed) params = params.set('shed', filters.shed);
       if (filters.month) params = params.set('month', filters.month);
+      if (filters.year) params = params.set('year', filters.year);
       if (filters.assignedToMe) params = params.set('assignedToMe', 'true');
     }
 

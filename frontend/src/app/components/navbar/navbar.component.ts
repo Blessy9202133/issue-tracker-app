@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,11 +11,20 @@ import { RouterModule, Router } from '@angular/router';
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
-  constructor(public router: Router) {}
+  public authService = inject(AuthService);
+  public router = inject(Router);
 
   isMainPage(): boolean {
     const url = this.router.url.split('?')[0];
     return url === '/' || url === '/create-issue';
   }
-}
 
+  isAuthPage(): boolean {
+    const url = this.router.url.split('?')[0];
+    return url === '/login' || url === '/register';
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
+}
