@@ -13,11 +13,7 @@
     <!-- Right: Nav Links -->
     <div class="nav-links">
       @if (authService.isLoggedIn()) {
-        @if (!isMainPage()) {
-          <a routerLink="/create-issue" class="nav-item">Register Complaint</a>
-        }
         <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
-        <a routerLink="/register" routerLinkActive="active" class="nav-item">Create Account</a>
 
         <div class="user-info">
           <span class="user-badge">👤 {{ authService.currentUser()?.name || authService.currentUser()?.username }}</span>
