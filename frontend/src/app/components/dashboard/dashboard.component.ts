@@ -24,6 +24,22 @@ export class DashboardComponent implements OnInit {
   complaintCategoryFilter = '';
   zoneFilter = '';
   shedFilter = '';
+  monthFilter = '';
+
+  monthsList = [
+    { value: '1', name: 'January' },
+    { value: '2', name: 'February' },
+    { value: '3', name: 'March' },
+    { value: '4', name: 'April' },
+    { value: '5', name: 'May' },
+    { value: '6', name: 'June' },
+    { value: '7', name: 'July' },
+    { value: '8', name: 'August' },
+    { value: '9', name: 'September' },
+    { value: '10', name: 'October' },
+    { value: '11', name: 'November' },
+    { value: '12', name: 'December' },
+  ];
 
   complaintTypes = ['Application Data', 'Loco Kavach Maintenance Issue','Stationary Kavach Maintenance Issue','Kavach Software Issue','Inter-Operability Issue','RFID Tag Issue','Other Kavach OEM Issue','Railway Issue', 'Others'];
 
@@ -75,6 +91,7 @@ export class DashboardComponent implements OnInit {
         complaintCategory: this.complaintCategoryFilter,
         zone: this.zoneFilter,
         shed: this.shedFilter,
+        month: this.monthFilter,
       })
       .subscribe({
         next: (issuesList) => {

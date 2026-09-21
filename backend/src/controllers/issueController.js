@@ -81,7 +81,7 @@ const createIssue = async (req, res) => {
 // @access  Private
 const getIssues = async (req, res) => {
   try {
-    const { status, zone, shed, complaintCategory, complaintType } = req.query;
+    const { status, zone, shed, complaintCategory, complaintType, month } = req.query;
     let query = {};
 
     if (status) {
@@ -102,6 +102,14 @@ const getIssues = async (req, res) => {
     }
     if (shed) {
       query.shed = { $regex: shed, $options: 'i' };
+    }
+    if (month) {
+      const m = parseInt(month, 10);
+      if (!isNaN(m) && m >= 1 && m <= 12) {
+        query.$expr = {
+          $eq: [{ $month: { $ifNull: ['$occurrenceDate', '$issueRaisedDate'] } }, m],
+        };
+      }
     }
 
     const issues = await Issue.find(query)

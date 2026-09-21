@@ -52,6 +52,16 @@
         }
       </select>
     </div>
+
+    <div class="filter-group">
+      <label>Month</label>
+      <select [(ngModel)]="monthFilter" (change)="onFilterChange()" class="filter-control">
+        <option value="">All Months</option>
+        @for (m of monthsList; track m.value) {
+          <option [value]="m.value">{{ m.name }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   <!-- Browser Cache Notice Banner -->
