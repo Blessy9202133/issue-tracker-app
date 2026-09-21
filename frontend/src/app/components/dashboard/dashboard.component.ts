@@ -132,10 +132,15 @@ export class DashboardComponent implements OnInit {
         error: (err) => {
           console.error('Error loading complaints on dashboard:', err);
           this.loading.set(false);
+          const rawMsg = err.error?.message || '';
           if (err.status === 0) {
             this.errorMessage.set('Unable to connect to the backend server. Please verify the backend service is running.');
+          } else if (rawMsg.includes('ETIMEDOUT') || rawMsg.includes('10.10.28.35')) {
+            this.errorMessage.set('Server database (10.10.28.35) is unreachable from this local network. Reconnecting...');
+            // Auto-retry fetch after 2 seconds while backend falls back
+            setTimeout(() => this.fetchIssues(), 2500);
           } else {
-            this.errorMessage.set(err.error?.message || 'Failed to load complaints from server.');
+            this.errorMessage.set(rawMsg || 'Failed to load complaints from server.');
           }
           this.cdr.markForCheck();
           this.cdr.detectChanges();
