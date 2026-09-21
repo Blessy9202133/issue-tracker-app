@@ -6,10 +6,23 @@
     </a>
 
     <div class="nav-links">
-      @if (!isMainPage()) {
-        <a routerLink="/" class="nav-item">Back to Main Page</a>
+      @if (authService.isLoggedIn()) {
+        @if (!isMainPage()) {
+          <a routerLink="/create-issue" class="nav-item">Register Complaint</a>
+        }
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
+
+        <div class="user-info">
+          <span class="user-badge">👤 {{ authService.currentUser()?.name || authService.currentUser()?.username }}</span>
+          <button type="button" (click)="logout()" class="btn-logout" title="Sign Out">
+            Logout
+          </button>
+        </div>
+      } @else {
+        @if (!isAuthPage()) {
+          <a routerLink="/login" class="nav-item active">Sign In</a>
+        }
       }
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
     </div>
   </div>
 </nav>
