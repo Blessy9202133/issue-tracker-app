@@ -1,4 +1,4 @@
-import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -11,7 +11,11 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
+  securityPasscode = '';
+  showPasscode = false;
+  isPasscodeVerified = signal<boolean>(false);
+
   name = '';
   username = '';
   email = '';
@@ -27,8 +31,49 @@ export class RegisterComponent {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      this.isPasscodeVerified.set(true);
+    }
+  }
+
+  togglePasscodeVisibility(): void {
+    this.showPasscode = !this.showPasscode;
+  }
+
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
+  }
+
+  verifyPasscode(): void {
+    if (!this.securityPasscode?.trim()) {
+      this.errorMessage.set('Please enter the security passcode.');
+      this.cdr.markForCheck();
+      return;
+    }
+
+    const input = this.securityPasscode.trim();
+    const validKeys = ['Admin#2026', 'HBL#2026', 'Admin2026', 'HBL2026', '2026', 'admin', 'Strong#2026'];
+
+    if (validKeys.includes(input)) {
+      this.isPasscodeVerified.set(true);
+      this.errorMessage.set('');
+      this.cdr.markForCheck();
+      return;
+    }
+
+    // Also check if passcode works as admin login password
+    this.authService.login({ username: 'admin', password: input }).subscribe({
+      next: () => {
+        this.isPasscodeVerified.set(true);
+        this.errorMessage.set('');
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorMessage.set('Incorrect security passcode. Access denied.');
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   onSubmit(): void {
@@ -65,11 +110,11 @@ export class RegisterComponent {
       .subscribe({
         next: (res) => {
           this.loading.set(false);
-          this.successMessage.set('Account created successfully! Logging you in...');
+          this.successMessage.set('Account created successfully! Redirecting...');
           this.cdr.markForCheck();
           setTimeout(() => {
             this.router.navigate(['/create-issue']);
-          }, 400);
+          }, 600);
         },
         error: (err) => {
           this.loading.set(false);
