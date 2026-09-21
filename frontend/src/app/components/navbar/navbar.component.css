@@ -1,7 +1,7 @@
 .navbar {
   background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
   color: #065f46;
-  padding: 0.45rem 0.85rem;
+  padding: 0.6rem 1rem;
   box-shadow: 0 2px 6px rgba(16, 185, 129, 0.08);
   border-bottom: 1px solid #a7f3d0;
 }
@@ -14,30 +14,30 @@
   margin: 0;
   padding: 0 0.25rem;
 }
-.nav-brand {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #065f46;
-  text-decoration: none;
+.nav-logo-link {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition: color 0.2s ease;
-}
-.nav-brand:hover {
-  color: #047857;
+  text-decoration: none;
 }
 .navbar-logo {
-  height: 36px;
+  height: 44px;
   width: auto;
   object-fit: contain;
   border-radius: 6px;
   background: #ffffff;
-  padding: 2px 5px;
+  padding: 3px 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   border: 1px solid #a7f3d0;
+}
+.nav-center-title {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #065f46;
+  letter-spacing: -0.01em;
+  text-align: center;
+  white-space: nowrap;
+  flex: 1;
+  margin: 0 1rem;
 }
 .nav-links {
   display: flex;
