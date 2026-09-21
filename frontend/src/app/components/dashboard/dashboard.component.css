@@ -144,6 +144,30 @@
   font-size: 0.95rem;
 }
 
+/* Browser Cache Notice Banner (Red Theme) */
+.browser-notice-banner {
+  background-color: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  color: #b91c1c;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 1px 3px rgba(185, 28, 28, 0.06);
+}
+.red-note-title {
+  color: #991b1b;
+  font-weight: 800;
+}
+.red-note-text {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
 /* Category Badges */
 .category-badge {
   padding: 0.25rem 0.55rem;

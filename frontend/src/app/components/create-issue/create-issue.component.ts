@@ -184,7 +184,12 @@ export class CreateIssueComponent implements OnInit {
   getImageUrl(path: string): string {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    return `http://127.0.0.1:5000${path}`;
+    if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      return `${protocol}//${hostname}:4915${path}`;
+    }
+    return `http://127.0.0.1:4915${path}`;
   }
 
   isImage(path: string): boolean {

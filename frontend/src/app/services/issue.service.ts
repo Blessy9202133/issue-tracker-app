@@ -13,15 +13,9 @@ export class IssueService {
     }
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
-      // When accessed via HTTPS (https://eg.hbl.in/KavachComplaintPortal/), use relative endpoint
-      // to leverage the existing IIS SSL Certificate on Port 443 (identical to WFMS)
-      if (window.location.protocol === 'https:') {
-        return '/KavachComplaintPortal/api/issues';
-      }
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://127.0.0.1:4915/api/issues';
-      }
-      return `http://${hostname}:4915/api/issues`;
+      const protocol = window.location.protocol; // 'https:' or 'http:'
+      // Connect directly to Node backend port 4915 matching LOCO WFMS (https://eg.hbl.in:4915/api/issues)
+      return `${protocol}//${hostname}:4915/api/issues`;
     }
     return 'http://127.0.0.1:4915/api/issues';
   }

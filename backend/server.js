@@ -1,28 +1,49 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
 const dotenv = require('dotenv');
-const connectDB = require('./src/config/db');
-const { initBackupScheduler } = require('./src/utils/backupScheduler');
-const issueRoutes = require('./src/routes/issueRoutes');
 
 dotenv.config();
 
+const connectDB = require('./src/config/db');
+const { initBackupScheduler } = require('./src/utils/backupScheduler');
+const Constants = require('./src/utils/Constants');
+const Helper = require('./src/utils/Helper');
+const issueRoutes = require('./src/routes/issueRoutes');
+
 // Connect Database
 connectDB();
+
+// Initialize automatic folder creation matching LOCO WFMS (files, certificates, logs, backups)
+Helper.createFolders();
 
 // Initialize Automatic Daily MongoDB Backup Scheduler
 initBackupScheduler();
 
 const app = express();
 
-// Middlewares - Allow CORS from localhost & 127.0.0.1
+// Middlewares - Allow CORS
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static uploaded photos
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static uploaded photos/files (FOLDER_DATA_FILES with fallback to local uploads)
+let uploadDir = Constants.FOLDERS.FOLDER_DATA_FILES;
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (e) {
+  console.warn(`Could not create ${uploadDir}: ${e.message}. Falling back to local uploads directory.`);
+  uploadDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+}
+app.use('/uploads', express.static(uploadDir));
 
 // Routes
 app.use('/api/issues', issueRoutes);
@@ -32,54 +53,47 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Customer Complaint Portal For Kavach API is running smoothly' });
 });
 
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
+const PORT_HTTPS = parseInt(process.env.BACKEND_PORT_HTTPS || process.env.PORT || 4915, 10);
+const PORT_HTTP = parseInt(process.env.BACKEND_PORT || 4916, 10);
 
-const PORT = process.env.PORT || 4915;
+// Auto-detect SSL Certificates (matching LOCO WFMS APIService)
+function getSSLCertificates() {
+  let keyPath = path.join(Constants.FOLDERS.FOLDER_DATA_CERTIFICATES, 'certificate.key');
+  let certPath = path.join(Constants.FOLDERS.FOLDER_DATA_CERTIFICATES, 'certificate.crt');
 
-// Function to auto-detect SSL certificates in server directory
-function findSSLCertificates() {
-  const possibleFolderPaths = [
+  if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+    return { keyPath, certPath, certDir: Constants.FOLDERS.FOLDER_DATA_CERTIFICATES };
+  }
+
+  // Alternative locations search
+  const searchDirs = [
     process.env.SSL_CERT_DIR,
+    'D:\\WFMS\\KavachComplaintPortal\\backend\\certificates',
+    'D:\\WFMS\\issue_tracker\\certificates',
+    'D:\\WFMS\\certificates',
+    'D:\\WFMS\\station-wfms\\certificates',
     'E:\\WFMS\\issue_tracker\\certificates',
     path.join(__dirname, 'certificates'),
-    path.join(__dirname, 'cert'),
-    path.join(__dirname, '..', 'certificates'),
   ].filter(Boolean);
 
-  for (const certDir of possibleFolderPaths) {
+  for (const certDir of searchDirs) {
     if (!fs.existsSync(certDir)) continue;
-
     try {
       const files = fs.readdirSync(certDir);
       const keyFile = files.find((f) => /key|private/i.test(f) && /\.(pem|key)$/i.test(f)) || files.find((f) => f.endsWith('.key'));
       const certFile = files.find((f) => /cert|crt|certificate/i.test(f) && !/ca|bundle/i.test(f) && /\.(pem|crt|cer)$/i.test(f)) || files.find((f) => f.endsWith('.crt') || f.endsWith('.pem'));
-
       if (keyFile && certFile) {
-        return {
-          keyPath: path.join(certDir, keyFile),
-          certPath: path.join(certDir, certFile),
-          certDir,
-        };
+        return { keyPath: path.join(certDir, keyFile), certPath: path.join(certDir, certFile), certDir };
       }
     } catch (e) {
-      console.warn(`Could not read cert dir ${certDir}: ${e.message}`);
+      console.warn(`Could not read cert directory ${certDir}: ${e.message}`);
     }
-  }
-
-  if (process.env.SSL_KEY_PATH && process.env.SSL_CERT_PATH && fs.existsSync(process.env.SSL_KEY_PATH) && fs.existsSync(process.env.SSL_CERT_PATH)) {
-    return {
-      keyPath: process.env.SSL_KEY_PATH,
-      certPath: process.env.SSL_CERT_PATH,
-      certDir: path.dirname(process.env.SSL_KEY_PATH),
-    };
   }
 
   return null;
 }
 
-const sslConfig = findSSLCertificates();
+const sslConfig = getSSLCertificates();
 
 if (sslConfig) {
   try {
@@ -87,18 +101,30 @@ if (sslConfig) {
       key: fs.readFileSync(sslConfig.keyPath),
       cert: fs.readFileSync(sslConfig.certPath),
     };
-    https.createServer(sslOptions, app).listen(PORT, () => {
-      console.log(`Customer Complaint Portal HTTPS API running on port ${PORT} using SSL certs from ${sslConfig.certDir}`);
+
+    // HTTPS API Server on PORT_HTTPS (4915)
+    https.createServer(sslOptions, app).listen(PORT_HTTPS, () => {
+      console.log(`Customer Complaint Portal HTTPS API running on port ${PORT_HTTPS} using SSL certs from ${sslConfig.certDir}`);
+    });
+
+    // HTTP redirect Server on PORT_HTTP (4916) matching LOCO WFMS APIService
+    const httpServer = http.createServer((req, res) => {
+      const host = (req.headers.host || '').split(':')[0];
+      res.writeHead(301, { Location: `https://${host}:${PORT_HTTPS}${req.url}` });
+      res.end();
+    });
+    httpServer.listen(PORT_HTTP, () => {
+      console.log(`Customer Complaint Portal HTTP redirect service running on port ${PORT_HTTP}`);
     });
   } catch (err) {
-    console.error(`Failed to start HTTPS server with SSL certs (${err.message}). Falling back to HTTP...`);
-    http.createServer(app).listen(PORT, () => {
-      console.log(`Customer Complaint Portal HTTP API running on port ${PORT}`);
+    console.error(`Failed to start HTTPS server (${err.message}). Falling back to HTTP on port ${PORT_HTTPS}...`);
+    http.createServer(app).listen(PORT_HTTPS, () => {
+      console.log(`Customer Complaint Portal HTTP API running on port ${PORT_HTTPS}`);
     });
   }
 } else {
-  http.createServer(app).listen(PORT, () => {
-    console.log(`Customer Complaint Portal HTTP API running on port ${PORT}`);
+  console.log(`SSL certs not found in certificates directory. Starting HTTP server on port ${PORT_HTTPS}...`);
+  http.createServer(app).listen(PORT_HTTPS, () => {
+    console.log(`Customer Complaint Portal HTTP API running on port ${PORT_HTTPS}`);
   });
 }
-

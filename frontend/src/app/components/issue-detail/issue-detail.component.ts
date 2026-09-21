@@ -396,12 +396,11 @@ export class IssueDetailComponent implements OnInit, OnDestroy {
     if (!path) return '';
     if (path.startsWith('http')) return path;
     if (typeof window !== 'undefined') {
+      const protocol = window.location.protocol;
       const hostname = window.location.hostname;
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return `http://127.0.0.1:4915${path}`;
-      }
+      return `${protocol}//${hostname}:4915${path}`;
     }
-    return path;
+    return `http://127.0.0.1:4915${path}`;
   }
 
   isImage(path: string): boolean {
