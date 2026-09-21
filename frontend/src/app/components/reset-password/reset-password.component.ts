@@ -30,9 +30,15 @@ export class ResetPasswordComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((params) => {
-      this.hash = params['hash'] || '';
+      let h = params['hash'] || this.route.snapshot.queryParams['hash'] || '';
+      if (!h && typeof window !== 'undefined' && window.location.search) {
+        h = new URLSearchParams(window.location.search).get('hash') || '';
+      }
+      this.hash = h;
       if (!this.hash) {
         this.errorMessage.set('Invalid or missing password reset token in URL.');
+      } else {
+        this.errorMessage.set(null);
       }
     });
   }

@@ -27,6 +27,19 @@ export class LoginComponent implements OnInit {
   private returnUrl = '/create-issue';
 
   ngOnInit(): void {
+    // Check if password reset hash is present in query parameters or window location
+    const hashFromParam = this.route.snapshot.queryParams['hash'];
+    let hashFromSearch: string | null = null;
+    if (typeof window !== 'undefined' && window.location.search) {
+      hashFromSearch = new URLSearchParams(window.location.search).get('hash');
+    }
+    const resetHash = hashFromParam || hashFromSearch;
+
+    if (resetHash) {
+      this.router.navigate(['/reset-password'], { queryParams: { hash: resetHash } });
+      return;
+    }
+
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/create-issue']);
       return;
